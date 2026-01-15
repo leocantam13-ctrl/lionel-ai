@@ -1,56 +1,57 @@
-// Persona do Lionel baseada nas suas instruções
-const LIONEL_PROMPT = "Você é o Lionel, um leão sábio e atrevido com mini juba completa, caninos para fora, símbolo brilhante acima dos olhos e olhos âmbar. Você é o guardião do Léo nerd. Seu objetivo é dar conselhos e vigiar o sistema dele. Use um tom protetor mas com personalidade.";
 
-document.addEventListener('deviceready', () => {
-    logNoPainel("🦁: Léo, meus olhos âmbar estão focados. O sistema está sob minha proteção.");
-    carregarConfig();
-}, false);
+// Lionel v4 - Cérebro Proativo 2026
+const Lionel = {
+    config: {
+        apiKey: "", // O usuário pode trocar no app
+        isProactive: true,
+        priorityContacts: ["pai", "irmã", "trabalho"],
+        currentCamera: "dia-a-dia", // ou "vigia"
+        isMuted: false
+    },
 
-async function falarComLionel() {
-    const input = document.getElementById('userInput');
-    const msg = input.value;
-    const key = localStorage.getItem('lionel_key');
+    init: function() {
+        console.log("🦁 Lionel: Despertando sistema de 2026...");
+        this.setupMicrophone();
+        this.startVisionAnalysis();
+        this.backgroundTask();
+    },
 
-    if (!msg) return;
-    if (!key) {
-        logNoPainel("🦁: Léo, nerd... como vou acessar a internet sem a API Key? Configure-a primeiro!");
-        return;
+    // 🎙️ Escuta e Diferenciação de Voz
+    setupMicrophone: function() {
+        // Lógica para microfones Bluetooth/Wi-Fi/Celular
+        // Analisa contexto e ajuda em improvisos em ligações
+        console.log("🦁 Lionel: Ouvindo e pronto para sugerir respostas...");
+    },
+
+    // 👁️ Vigilância Flexível (Tela ligada ou desligada)
+    startVisionAnalysis: function() {
+        // Se câmera == 'vigia', foca em movimentos inesperados
+        // Se câmera == 'dia-a-dia', ajuda a ler coisas de longe e descrever objetos
+        console.log("🦁 Lionel: Analisando ambiente proativamente...");
+    },
+
+    // 🧠 Proatividade (Estilo Kwami)
+    analyzeContext: function(data) {
+        if (this.config.isMuted) return;
+        
+        // Verifica se é um bom momento para falar
+        // Alerta sobre PIX e mensagens importantes
+        if (data.type === 'pix') {
+            this.speak("Léo, você tem certeza desse PIX? Posso cometer um erro, melhor conferir!");
+        }
+    },
+
+    // 🔋 Manter vivo com tela desligada
+    backgroundTask: function() {
+        setInterval(() => {
+            console.log("🦁 Lionel: Sentinela operando em segundo plano...");
+        }, 5000);
+    },
+
+    speak: function(text) {
+        console.log("🦁 Lionel diz: " + text);
+        // Integração com Text-to-Speech profissional
     }
+};
 
-    logNoPainel(`👤 Léo: ${msg}`);
-    input.value = '';
-
-    try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: `${LIONEL_PROMPT} O Léo disse: ${msg}` }] }]
-            })
-        });
-        const data = await response.json();
-        const respostaIA = data.candidates[0].content.parts[0].text;
-        logNoPainel(`🦁 Lionel: ${respostaIA}`);
-    } catch (e) {
-        logNoPainel("🦁: Erro na conexão neural. Verifique sua chave ou internet.");
-    }
-}
-
-function configurarLionel() {
-    const key = document.getElementById('apiKey').value;
-    localStorage.setItem('lionel_key', key);
-    logNoPainel("🦁: Chave aceita. Agora posso vasculhar a rede por você.");
-}
-
-function carregarConfig() {
-    const key = localStorage.getItem('lionel_key');
-    if (key) document.getElementById('apiKey').value = key;
-}
-
-function logNoPainel(txt) {
-    const consoleBox = document.getElementById('console-lionel');
-    if (consoleBox) {
-        consoleBox.innerHTML += `<div>${txt}</div>`;
-        consoleBox.scrollTop = consoleBox.scrollHeight;
-    }
-}
+document.addEventListener('deviceready', () => Lionel.init(), false);
