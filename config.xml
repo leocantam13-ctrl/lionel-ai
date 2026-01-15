@@ -1,13 +1,31 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.leo.lionel" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.leo.lionel" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Lionel AI</name>
     <description>
-        A sample Apache Cordova application that responds to the deviceready event.
+        Lionel v4 - Sentinela Proativo e Assistente de Evolução Continuada.
     </description>
     <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
-        Apache Cordova Team
+        Léo & Lionel Team
     </author>
+
+    <preference name="AndroidXEnabled" value="true" />
+    <plugin name="cordova-plugin-android-permissions" spec="^1.1.5" />
+    
+    <platform name="android">
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
+            <uses-permission android:name="android.permission.RECORD_AUDIO" />
+            <uses-permission android:name="android.permission.CAMERA" />
+            <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+            <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+        </config-file>
+    </platform>
+
     <content src="index.html" />
+    
+    <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
 </widget>
