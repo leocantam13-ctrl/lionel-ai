@@ -21,6 +21,8 @@ jobs:
       - name: build apk
         run: |
           cordova platform add android
+          # REMOVENDO O PLUGIN QUE ESTÁ DANDO ERRO
+          cordova plugin remove cordova-plugin-whitelist || true
           cordova build android
 
       - name: upload apk
