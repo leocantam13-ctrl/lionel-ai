@@ -2,40 +2,53 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lionel: O Guardião Supremo</title>
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <title>Lionel v4 - Painel Kwami</title>
     <style>
-        body { background: #000; color: #ffd700; font-family: sans-serif; padding: 15px; }
-        .header { border-bottom: 2px solid #ff8c00; text-align: center; padding-bottom: 10px; margin-bottom: 20px; }
-        .status { color: #00ff00; font-size: 0.7em; letter-spacing: 2px; }
-        .card { background: #111; border: 1px solid #333; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(255, 140, 0, 0.2); }
-        input, textarea { width: 100%; background: #222; color: #fff; border: 1px solid #444; padding: 12px; margin: 5px 0; border-radius: 8px; box-sizing: border-box; }
-        button { background: linear-gradient(45deg, #ff8c00, #ffd700); color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; }
-        #console-lionel { background: #050505; border-left: 3px solid #ff8c00; padding: 10px; height: 250px; overflow-y: auto; font-family: monospace; font-size: 0.9em; border-radius: 0 8px 8px 0; }
-        .lionel-msg { color: #ff8c00; margin-bottom: 8px; }
-        .leo-msg { color: #00ffff; margin-bottom: 8px; }
+        body { background: #0d0d0d; color: #ffcc00; font-family: 'Segoe UI', sans-serif; padding: 20px; text-align: center; }
+        .card { background: #1a1a1a; border: 2px solid #ffcc00; border-radius: 15px; padding: 15px; margin-bottom: 20px; box-shadow: 0 0 15px #ffcc0033; }
+        input { width: 85%; padding: 12px; margin: 10px 0; background: #222; color: #fff; border: 1px solid #ffcc00; border-radius: 8px; }
+        button { background: #ffcc00; color: #000; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .status { font-size: 0.9em; color: #00ff00; }
+        .camera-select { margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🦁 LIONEL</h1>
-        <div class="status">SISTEMA VIGILANTE ATIVO</div>
+    <div class="card">
+        <h1>🦁 LIONEL V4</h1>
+        <p class="status">● Sistema Sentinela Ativo</p>
     </div>
 
     <div class="card">
-        <h3>🔑 Conexão Neural</h3>
-        <input type="password" id="apiKey" placeholder="Sua Gemini API Key">
-        <button onclick="configurarLionel()">SINCRONIZAR GUARDIÃO</button>
+        <h3>🔑 Chave API</h3>
+        <input type="password" id="apiKeyInput" placeholder="Insira sua Chave API aqui...">
+        <button onclick="saveAPI()">Atualizar API</button>
     </div>
 
     <div class="card">
-        <h3>🧠 Centro de Comando</h3>
-        <div id="console-lionel">Aguardando ordens do Léo...</div>
-        <input type="text" id="userInput" placeholder="Fale com o Lionel...">
-        <button onclick="falarComLionel()">ENVIAR COMANDO</button>
+        <h3>📸 Visão do Sentinela</h3>
+        <select id="cameraMode" class="input" style="width: 90%; padding: 10px; margin-bottom: 10px;">
+            <option value="dia-a-dia">Câmera Dia a Dia (Óculos/Pin)</option>
+            <option value="vigia">Câmera de Vigia (Wi-Fi Casa)</option>
+        </select>
+        <p style="font-size: 0.8em;">Lionel está vigiando proativamente em segundo plano.</p>
+    </div>
+
+    <div id="log" style="height: 100px; overflow-y: auto; background: #000; color: #aaa; font-size: 0.7em; padding: 10px; border-radius: 10px;">
+        Lionel: Aguardando comandos...
     </div>
 
     <script src="cordova.js"></script>
     <script src="js/index.js"></script>
+    <script src="js/accessibility.js"></script>
+
+    <script>
+        function saveAPI() {
+            const key = document.getElementById('apiKeyInput').value;
+            localStorage.setItem('lionel_api_key', key);
+            alert('Lionel: Chave API atualizada com sucesso!');
+            location.reload();
+        }
+    </script>
 </body>
 </html>
