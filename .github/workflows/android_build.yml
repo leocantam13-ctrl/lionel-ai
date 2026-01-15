@@ -1,0 +1,24 @@
+name: Build Lionel APK
+on:
+  push:
+    branches: [ main, principal ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: install cordova
+        run: npm install -g cordova
+      - name: build apk
+        run: |
+          cordova platform add android
+          cordova build android
+      - name: upload apk
+        uses: actions/upload-artifact@v2
+        with:
+          name: lionel-app-debug
+          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
