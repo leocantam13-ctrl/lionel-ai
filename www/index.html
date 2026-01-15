@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lionel: O Guardião Supremo</title>
+    <style>
+        body { background: #000; color: #ffd700; font-family: sans-serif; padding: 15px; }
+        .header { border-bottom: 2px solid #ff8c00; text-align: center; padding-bottom: 10px; margin-bottom: 20px; }
+        .status { color: #00ff00; font-size: 0.7em; letter-spacing: 2px; }
+        .card { background: #111; border: 1px solid #333; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 0 10px rgba(255, 140, 0, 0.2); }
+        input, textarea { width: 100%; background: #222; color: #fff; border: 1px solid #444; padding: 12px; margin: 5px 0; border-radius: 8px; box-sizing: border-box; }
+        button { background: linear-gradient(45deg, #ff8c00, #ffd700); color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+        #console-lionel { background: #050505; border-left: 3px solid #ff8c00; padding: 10px; height: 250px; overflow-y: auto; font-family: monospace; font-size: 0.9em; border-radius: 0 8px 8px 0; }
+        .lionel-msg { color: #ff8c00; margin-bottom: 8px; }
+        .leo-msg { color: #00ffff; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🦁 LIONEL</h1>
+        <div class="status">SISTEMA VIGILANTE ATIVO</div>
+    </div>
+
+    <div class="card">
+        <h3>🔑 Conexão Neural</h3>
+        <input type="password" id="apiKey" placeholder="Sua Gemini API Key">
+        <button onclick="configurarLionel()">SINCRONIZAR GUARDIÃO</button>
+    </div>
+
+    <div class="card">
+        <h3>🧠 Centro de Comando</h3>
+        <div id="console-lionel">Aguardando ordens do Léo...</div>
+        <input type="text" id="userInput" placeholder="Fale com o Lionel...">
+        <button onclick="falarComLionel()">ENVIAR COMANDO</button>
+    </div>
+
+    <script src="cordova.js"></script>
+    <script src="js/index.js"></script>
+</body>
+</html>
