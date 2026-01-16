@@ -2,6 +2,7 @@ document.addEventListener('deviceready', () => {
     loadSettings();
     startCamera();
     displayHistory();
+    iniciarSentinela();
 }, false);
 
 function toggleMenu() {
@@ -10,53 +11,45 @@ function toggleMenu() {
 }
 
 function saveAll() {
-    const config = {
-        key: document.getElementById('apiKey').value,
-        user: document.getElementById('userName').value,
-        bio: document.getElementById('aiBio').value,
-        ip: document.getElementById('camIp').value
-    };
+    const config = { key: document.getElementById('apiKey').value, user: document.getElementById('userName').value, bio: document.getElementById('aiBio').value };
     localStorage.setItem('lionel_config', JSON.stringify(config));
-    alert("Lionel Atualizado!");
     toggleMenu();
+    falar("Configurações aplicadas, Léo. Estou pronto para o dia.");
 }
 
 function startCamera() {
-    const video = document.getElementById('video-preview');
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-        .then(stream => { video.srcObject = stream; })
-        .catch(err => console.log("Câmera local desativada ou erro: ", err));
+        .then(stream => { document.getElementById('video-preview').srcObject = stream; })
+        .catch(e => console.log("Câmera OFF"));
+}
+
+function falar(texto) {
+    const msg = new SpeechSynthesisUtterance(texto);
+    msg.lang = 'pt-BR';
+    window.speechSynthesis.speak(msg);
 }
 
 async function processInput() {
     const el = document.getElementById('mainInput');
     const text = el.value.trim();
     if (!text) return;
-
     addMsg(text, 'user-msg');
     el.value = "";
-
     const config = JSON.parse(localStorage.getItem('lionel_config'));
-    if (!config || !config.key) {
-        addMsg("Léo, preciso da sua Chave API nas configurações para pensar.", 'lionel-msg');
-        return;
-    }
+    if (!config || !config.key) { addMsg("Léo, preciso da sua Chave API.", 'lionel-msg'); return; }
 
     try {
-        // Conexão real com Gemini API (Exemplo)
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${config.key}`, {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: `Você é o Lionel, companheiro do ${config.user}. Instruções: ${config.bio}. Usuário diz: ${text}` }] }] })
+            body: JSON.stringify({ contents: [{ parts: [{ text: `Você é o Lionel, o Kwami do ${config.user}. Bio: ${config.bio}. O Léo diz: ${text}` }] }] })
         });
         const data = await response.json();
         const reply = data.candidates[0].content.parts[0].text;
-        
         addMsg(reply, 'lionel-msg');
+        falar(reply);
         saveChat(text, reply);
-    } catch (e) {
-        addMsg("Erro ao conectar ao meu cérebro. Verifique a chave e a internet.", 'lionel-msg');
-    }
+    } catch (e) { addMsg("Erro de conexão.", 'lionel-msg'); }
 }
 
 function addMsg(text, type) {
@@ -69,15 +62,16 @@ function addMsg(text, type) {
 }
 
 function saveChat(u, l) {
-    let history = JSON.parse(localStorage.getItem('lionel_history')) || [];
-    history.push({ user: u, lionel: l, date: new Date().toLocaleDateString() });
-    localStorage.setItem('lionel_history', JSON.stringify(history));
+    let hist = JSON.parse(localStorage.getItem('lionel_history')) || [];
+    hist.push({ u, l, d: new Date().toLocaleDateString() });
+    localStorage.setItem('lionel_history', JSON.stringify(hist));
 }
 
 function displayHistory() {
-    let history = JSON.parse(localStorage.getItem('lionel_history')) || [];
-    history.forEach(h => {
-        addMsg(h.user, 'user-msg');
-        addMsg(h.lionel, 'lionel-msg');
-    });
+    let hist = JSON.parse(localStorage.getItem('lionel_history')) || [];
+    hist.forEach(h => { addMsg(h.u, 'user-msg'); addMsg(h.l, 'lionel-msg'); });
+}
+
+function iniciarSentinela() {
+    setInterval(() => { console.log("Lionel vigiando..."); }, 5000);
 }
