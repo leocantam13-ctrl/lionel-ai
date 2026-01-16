@@ -3,84 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Lionel v4</title>
+    <title>Lionel v4 - Elite</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --gold: #ffcc00; --dark: #080808; --card: #151515; --text: #f0f0f0; }
+        :root { --gold: #ffcc00; --dark: #0a0a0a; --card: #151515; --text: #f0f0f0; }
         body { background: var(--dark); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        header { padding: 15px; background: var(--card); border-bottom: 1px solid var(--gold); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
         
-        header { padding: 15px 20px; background: var(--card); border-bottom: 1px solid var(--gold); display: flex; justify-content: space-between; align-items: center; z-index: 100; }
-        .lion-brand { color: var(--gold); font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        /* Monitor de Vídeo */
+        #camera-monitor { width:100%; height:180px; background:#000; border-bottom:1px solid #333; position:relative; }
+        #video-preview { width:100%; height:100%; object-fit:cover; }
 
-        #chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; background: radial-gradient(circle at top right, #1a1a10, #080808); }
-        .msg { max-width: 80%; padding: 14px; border-radius: 18px; font-size: 0.95rem; line-height: 1.5; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .lionel { align-self: flex-start; background: var(--card); border: 1px solid #333; border-bottom-left-radius: 2px; color: var(--gold); }
-        .user { align-self: flex-end; background: var(--gold); color: #000; border-bottom-right-radius: 2px; font-weight: 500; }
+        /* Chat */
+        #chat-flow { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: linear-gradient(to bottom, #111, #080808); }
+        .msg { padding: 12px; border-radius: 18px; max-width: 85%; font-size: 0.95rem; line-height: 1.4; }
+        .lionel-msg { align-self: flex-start; background: #222; border: 1px solid #333; color: var(--gold); }
+        .user-msg { align-self: flex-end; background: var(--gold); color: #000; }
 
-        .settings-panel { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background: var(--dark); transition: 0.3s; z-index: 200; padding: 25px; box-sizing: border-box; overflow-y: auto; }
-        .settings-panel.active { right: 0; }
-        .input-group { margin-bottom: 20px; }
-        label { display: block; color: var(--gold); font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; box-sizing: border-box; }
+        /* Configurações */
+        #settings { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 2000; padding: 25px; box-sizing: border-box; overflow-y: auto; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; }
+        .btn-save { background: var(--gold); color: black; font-weight: bold; padding: 15px; border: none; width: 100%; border-radius: 10px; cursor: pointer; }
 
-        .input-area { padding: 15px; background: var(--card); display: flex; align-items: center; gap: 10px; border-top: 1px solid #222; }
-        .msg-input { flex: 1; background: #222; border: none; padding: 12px 20px; border-radius: 25px; color: white; outline: none; }
-        .btn-round { background: none; border: none; color: var(--gold); font-size: 1.5rem; cursor: pointer; }
+        /* Input */
+        .input-box { padding: 15px; background: var(--card); display: flex; gap: 10px; align-items: center; }
+        .main-input { flex: 1; background: #222; border: none; padding: 12px; border-radius: 25px; color: white; outline: none; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="lion-brand"><i class="fas fa-shield-cat"></i> LIONEL V4</div>
-    <button class="btn-round" onclick="toggleSettings()"><i class="fas fa-bars-staggered"></i></button>
+    <div style="color:var(--gold); font-weight:bold;"><i class="fas fa-lion"></i> LIONEL V4</div>
+    <button onclick="toggleMenu()" style="background:none; border:none; color:var(--gold); font-size:1.4rem;"><i class="fas fa-sliders"></i></button>
 </header>
 
-<div id="settings" class="settings-panel">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-        <h2 style="color:var(--gold); margin:0;">Configurações</h2>
-        <button class="btn-round" onclick="toggleSettings()"><i class="fas fa-times"></i></button>
-    </div>
-
-    <div class="input-group">
-        <label>Chave API (Gemini/OpenAI)</label>
-        <input type="password" id="apiKey" placeholder="Sua chave de acesso">
-    </div>
-
-    <div class="input-group">
-        <label>Personalidade da IA</label>
-        <input type="text" id="aiName" value="Lionel">
-        <textarea id="personaBio" style="margin-top:10px; height:60px;" placeholder="Ex: Companheiro sábio e atrevido"></textarea>
-    </div>
-
-    <div class="input-group">
-        <label>Seu Nome / Apelido</label>
-        <input type="text" id="userName" value="Léo">
-    </div>
-
-    <div class="input-group">
-        <label>Câmeras Nomeáveis (IP ou Local)</label>
-        <input type="text" id="cam1" placeholder="Ex: Dia a Dia (Óculos)">
-        <input type="text" id="cam2" placeholder="Ex: Vigilância (IP: 192.168...)">
-    </div>
-
-    <div class="input-group">
-        <label>Fonte de Áudio</label>
-        <select id="audioSrc">
-            <option value="mic">Microfone do Celular</option>
-            <option value="bt">Bluetooth / Fone</option>
-            <option value="wifi">Wi-Fi / Externo</option>
-        </select>
-    </div>
-
-    <button onclick="saveAll()" style="width:100%; background:var(--gold); color:black; padding:15px; border:none; border-radius:10px; font-weight:bold; font-size:1rem;">SALVAR E EVOLUIR</button>
+<div id="camera-monitor">
+    <video id="video-preview" autoplay playsinline></video>
+    <div style="position:absolute; top:10px; right:10px; color:#00ff00; font-size:0.7rem;"><i class="fas fa-circle"></i> LIVE</div>
 </div>
 
-<div id="chat-container"></div>
+<div id="settings">
+    <h2 style="color:var(--gold);">Configurações de Elite</h2>
+    <label>Chave API (Gemini/GPT):</label>
+    <input type="password" id="apiKey" placeholder="Cole sua chave aqui...">
+    <label>Nome do Usuário:</label>
+    <input type="text" id="userName" placeholder="Ex: Léo">
+    <label>IP da Câmera Wi-Fi (Opcional):</label>
+    <input type="text" id="camIp" placeholder="http://192.168...">
+    <label>Personalidade / Persona:</label>
+    <textarea id="aiBio" style="height:60px;">Companheiro proativo e sábio.</textarea>
+    <button class="btn-save" onclick="saveAll()">SALVAR E ATIVAR</button>
+    <button onclick="toggleMenu()" style="color:gray; background:none; border:none; width:100%; margin-top:15px;">Voltar</button>
+</div>
 
-<div class="input-area">
-    <button class="btn-round" onclick="attachFile()"><i class="fas fa-paperclip"></i></button>
-    <input type="text" id="mainInput" class="msg-input" placeholder="Nova ordem...">
-    <button class="btn-round" onclick="processInput()"><i class="fas fa-arrow-up-circle"></i></button>
+<div id="chat-flow"></div>
+
+<div class="input-box">
+    <button style="background:none; border:none; color:gray;"><i class="fas fa-paperclip"></i></button>
+    <input type="text" id="mainInput" class="main-input" placeholder="Nova ordem...">
+    <button onclick="processInput()" style="background:none; border:none; color:var(--gold); font-size:1.5rem;"><i class="fas fa-arrow-up-circle"></i></button>
 </div>
 
 <script src="cordova.js"></script>
