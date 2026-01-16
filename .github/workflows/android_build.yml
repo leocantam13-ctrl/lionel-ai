@@ -2,7 +2,6 @@ name: Build Lionel APK
 on:
   push:
     branches: [ main, principal ]
-  workflow_dispatch:
 
 jobs:
   build:
@@ -10,22 +9,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: setup node
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: install cordova
+      - name: Install Cordova
         run: npm install -g cordova
 
-      - name: build apk
+      - name: Clean and Prepare Cordova
         run: |
-          cordova platform add android
-          # REMOVENDO O PLUGIN QUE ESTÁ DANDO ERRO
-          cordova plugin remove cordova-plugin-whitelist || true
-          cordova build android
+          cordova platform remove android || true
+          cordova platform add android@^14.0.1
+          cordova plugin add cordova-plugin-android-permissions
 
-      - name: upload apk
+      - name: Build APK
+        run: cordova build android
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: lionel-app-debug
