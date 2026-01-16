@@ -1,36 +1,22 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Lionel Assistant</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lionel AI - Chat</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="chat-container">
+    <div id="chat-box"></div>
+    <div id="input-area">
+      <input type="text" id="user-input" placeholder="Digite algo..." />
+      <button id="send-btn">Enviar</button>
+    </div>
+  </div>
 
-<header>
-  <h1>🦁 Lionel</h1>
-</header>
-
-<main id="chat"></main>
-
-<footer>
-  <input id="userInput" placeholder="Fale ou digite..." />
-  <button id="micBtn">🎤</button>
-  <button id="sendBtn">➤</button>
-</footer>
-
-<section id="settings">
-  <h3>Configurações</h3>
-  <input id="apiKey" placeholder="Cole sua API Gemini" />
-  <button id="saveApi">Salvar API</button>
-</section>
-
-<script src="cordova.js"></script>
-<script src="js/memory.js"></script>
-<script src="js/gemini.js"></script>
-<script src="js/voice.js"></script>
-<script src="js/index.js"></script>
-
+  <script src="js/memory.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/index.js"></script>
 </body>
 </html>
