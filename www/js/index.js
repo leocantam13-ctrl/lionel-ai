@@ -1,76 +1,83 @@
 document.addEventListener('deviceready', () => {
-    window.lionelMemory = JSON.parse(localStorage.getItem('lionel_memory')) || { chats: [], userStyle: {}, contacts: {} };
     loadSettings();
-    renderHistory();
-    startProactiveListener();
+    startCamera();
+    displayHistory();
 }, false);
+
+function toggleMenu() {
+    const s = document.getElementById('settings');
+    s.style.display = s.style.display === 'block' ? 'none' : 'block';
+}
 
 function saveAll() {
     const config = {
         key: document.getElementById('apiKey').value,
-        ai: document.getElementById('aiName').value,
         user: document.getElementById('userName').value,
-        persona: document.getElementById('personaBio').value,
-        cams: [document.getElementById('cam1').value, document.getElementById('cam2').value],
-        audio: document.getElementById('audioSrc').value
+        bio: document.getElementById('aiBio').value,
+        ip: document.getElementById('camIp').value
     };
     localStorage.setItem('lionel_config', JSON.stringify(config));
-    toggleSettings();
-    addMsg("Lionel", `Configurações atualizadas, ${config.user}. Estou pronto.`);
+    alert("Lionel Atualizado!");
+    toggleMenu();
 }
 
-function processInput() {
+function startCamera() {
+    const video = document.getElementById('video-preview');
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(stream => { video.srcObject = stream; })
+        .catch(err => console.log("Câmera local desativada ou erro: ", err));
+}
+
+async function processInput() {
     const el = document.getElementById('mainInput');
     const text = el.value.trim();
-    if(!text) return;
+    if (!text) return;
 
-    addMsg("User", text);
+    addMsg(text, 'user-msg');
     el.value = "";
 
-    // Lógica de Proatividade e Inteligência
-    setTimeout(() => {
-        let response = "";
-        if(text.toLowerCase().includes("ajuda")) {
-            response = "Estou analisando o contexto agora. Vou te dar sugestões baseadas no seu jeito de falar.";
-        } else if(text.toLowerCase().includes("pix")) {
-            response = "Atenção: Ação financeira detectada. Léo, confirme se os dados estão corretos antes de eu usar minhas garras.";
-        } else {
-            response = "Entendido. Memorizado e pronto para evoluir com essa informação.";
-        }
-        addMsg("Lionel", response);
-        learnFromUser(text);
-    }, 800);
-}
-
-function learnFromUser(input) {
-    // Mimetismo de estilo e memória de longo prazo
-    window.lionelMemory.chats.push({t: Date.now(), msg: input});
-    localStorage.setItem('lionel_memory', JSON.stringify(window.lionelMemory));
-}
-
-function addMsg(sender, text) {
-    const container = document.getElementById('chat-container');
-    const div = document.createElement('div');
-    div.className = `msg ${sender === 'User' ? 'user' : 'lionel'}`;
-    div.innerText = text;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-}
-
-function toggleSettings() {
-    document.getElementById('settings').classList.toggle('active');
-}
-
-function startProactiveListener() {
-    // Simulação de escuta proativa (Numbers/Dates)
-    console.log("Lionel ouvindo ambiente...");
-}
-
-function loadSettings() {
-    const s = JSON.parse(localStorage.getItem('lionel_config'));
-    if(s) {
-        document.getElementById('apiKey').value = s.key;
-        document.getElementById('aiName').value = s.ai;
-        document.getElementById('userName').value = s.user;
+    const config = JSON.parse(localStorage.getItem('lionel_config'));
+    if (!config || !config.key) {
+        addMsg("Léo, preciso da sua Chave API nas configurações para pensar.", 'lionel-msg');
+        return;
     }
+
+    try {
+        // Conexão real com Gemini API (Exemplo)
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${config.key}`, {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: `Você é o Lionel, companheiro do ${config.user}. Instruções: ${config.bio}. Usuário diz: ${text}` }] }] })
+        });
+        const data = await response.json();
+        const reply = data.candidates[0].content.parts[0].text;
+        
+        addMsg(reply, 'lionel-msg');
+        saveChat(text, reply);
+    } catch (e) {
+        addMsg("Erro ao conectar ao meu cérebro. Verifique a chave e a internet.", 'lionel-msg');
+    }
+}
+
+function addMsg(text, type) {
+    const flow = document.getElementById('chat-flow');
+    const div = document.createElement('div');
+    div.className = `msg ${type}`;
+    div.innerText = text;
+    flow.appendChild(div);
+    flow.scrollTop = flow.scrollHeight;
+}
+
+function saveChat(u, l) {
+    let history = JSON.parse(localStorage.getItem('lionel_history')) || [];
+    history.push({ user: u, lionel: l, date: new Date().toLocaleDateString() });
+    localStorage.setItem('lionel_history', JSON.stringify(history));
+}
+
+function displayHistory() {
+    let history = JSON.parse(localStorage.getItem('lionel_history')) || [];
+    history.forEach(h => {
+        addMsg(h.user, 'user-msg');
+        addMsg(h.lionel, 'lionel-msg');
+    });
 }
