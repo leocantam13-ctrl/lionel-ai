@@ -1,39 +1,47 @@
-# LIONEL V4 ELITE - BUILD FORÇADO 2026 - GARRAS E SENTINELA ATIVADOS
+# LIONEL V4 ELITE - BUILD 2026 - GARRAS E SENTINELA
 
 name: Build Lionel APK
+
 on:
   push:
     branches: [ main, principal ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
-      - name: set up JDK 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: setup node
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: install cordova
+      - name: Install Cordova
         run: npm install -g cordova
 
-      - name: prepare cordova
+      - name: Prepare Cordova
         run: |
-          cordova platform add android
-          # Aqui ele instala os plugins que pedimos no config.xml
+          cordova platform remove android || true
+          cordova platform add android@^14.0.1
+          # Instala plugins
           cordova plugin add cordova-plugin-android-permissions
-          
-      - name: build apk
+          cordova plugin add cordova-plugin-camera
+          cordova plugin add cordova-plugin-media
+          cordova plugin add cordova-plugin-file
+          cordova plugin add cordova-plugin-background-mode
+          cordova plugin add cordova-plugin-device
+
+      - name: Build APK
         run: cordova build android
 
-      - name: upload apk
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: lionel-app-debug
