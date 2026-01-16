@@ -1,34 +1,48 @@
-// Lionel v4 - Módulo de Interação de Sistema (Garras)
-const LionelAccessibility = {
-    
-    // Função para clicar num elemento pelo texto (ex: "Enviar")
-    clickByText: function(textToClick) {
-        console.log("🦁 Lionel: A procurar botão '" + textToClick + "' para clicar...");
-        // A lógica de acessibilidade do Android deteta o elemento e executa o clique
-        window.plugins.accessibility.performAction({
-            action: "click",
-            targetText: textToClick
-        }, () => {
-            console.log("🦁 Lionel: Clique executado com sucesso!");
-        }, (err) => {
-            console.log("🦁 Lionel: Erro ao clicar: " + err);
-        });
-    },
+// Lionel v4 - Módulo de Acessibilidade e Garras
+(function() {
+    "use strict";
 
-    // Função para ler o que está no ecrã e resumir para ti
-    readScreenContext: function() {
-        console.log("🦁 Lionel: A ler o conteúdo da aplicação...");
-        // Captura textos do app atual para o Lionel te ajudar a improvisar
-    },
+    const LionelGarras = {
+        // Analisa o que aparece na tela (mensagens, botões, textos)
+        aoMudarTela: function(evento) {
+            const textoTela = evento.text || "";
+            const pacoteApp = evento.packageName || "";
 
-    // Selecionar campos e preencher (útil para valores de PIX ou mensagens)
-    setTextInField: function(targetField, textValue) {
-        console.log("🦁 Lionel: A preencher campo '" + targetField + "'...");
-        // Lionel "digita" por ti proativamente
-    }
-};
+            // 1. Filtro de Prioridades (Pai, Irmã, Hospital, Trabalho)
+            const prioridades = ["pai", "irmã", "hospital", "trabalho", "urgente", "pix"];
+            prioridades.forEach(p => {
+                if (textoTela.toLowerCase().includes(p)) {
+                    // Lionel avisa proativamente no fone ou notificação
+                    console.log(`[Lionel] Prioridade detectada em ${pacoteApp}: ${textoTela}`);
+                }
+            });
 
-// Avisa o Cérebro (index.js) que as garras estão prontas
-document.addEventListener('deviceready', () => {
-    console.log("🦁 Lionel: Módulo de acessibilidade carregado.");
-}, false);
+            // 2. Sugestões de Improviso (Se detectar que você está numa conversa)
+            if (pacoteApp.includes("whatsapp") || pacoteApp.includes("telephony")) {
+                this.analisarContextoSocial(textoTela);
+            }
+        },
+
+        // Sugere respostas ou ações como salvar números e alarmes
+        analisarContextoSocial: function(texto) {
+            const regexTel = /(\d{2})?\s?9?\d{4}-?\d{4}/;
+            if (regexTel.test(texto)) {
+                // Aqui o Lionel falaria: "Léo, quer que eu salve esse número?"
+                console.log("[Lionel] Sugestão: Salvar contato detectado.");
+            }
+        },
+
+        // Trava de Segurança para ações financeiras
+        segurancaCritica: function(textoBotao) {
+            if (textoBotao.toLowerCase().includes("confirmar") || textoBotao.toLowerCase().includes("enviar")) {
+                // Lionel pergunta antes de deixar o clique acontecer
+                return confirm("Lionel: Léo, detectei uma ação importante. Posso prosseguir com as garras?");
+            }
+            return true;
+        }
+    };
+
+    // Comunicação com o sistema Android (via Plugin de Acessibilidade)
+    window.addEventListener("accessibilityevent", (e) => LionelGarras.aoMudarTela(e));
+
+})();
