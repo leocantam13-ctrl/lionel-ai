@@ -2,22 +2,25 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Lionel AI</title>
+<title>Lionel AI Elite</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
+<!-- ABAS -->
 <div id="tabs">
   <button onclick="showTab('chat')">Chat</button>
   <button onclick="showTab('cameras')">Câmeras</button>
   <button onclick="showTab('settings')">Configurações</button>
 </div>
 
+<!-- CONTEÚDO -->
 <div id="content">
+
   <!-- CHAT -->
   <div id="chat" class="tab-content">
     <div id="chat-history"></div>
-    <input type="text" id="chat-input" placeholder="Escreva aqui...">
+    <input type="text" id="chat-input" placeholder="Escreva aqui..." onkeydown="if(event.key==='Enter') sendChat()">
     <button onclick="sendChat()">Enviar</button>
     <button onclick="LionelCore.startVoiceMode()">🎤 Voz</button>
     <button onclick="LionelCore.stopVoiceMode()">🛑 Parar Voz</button>
@@ -43,6 +46,7 @@
       <option value="female">Feminina</option>
     </select>
   </div>
+
 </div>
 
 <script src="js/memory.js"></script>
