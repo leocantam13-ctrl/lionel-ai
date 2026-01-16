@@ -1,23 +1,51 @@
+/* =========================================================
+   LIONEL VOICE – TTS e STT
+   ========================================================= */
+
 const LionelVoice = (() => {
-  function init() { console.log("Voz iniciada"); }
+  let recognition;
+  let listeningCallback = null;
+
+  function init() {
+    console.log("LionelVoice iniciado");
+
+    // Inicializa TTS
+    if (!window.speechSynthesis) {
+      console.warn("TTS não suportado neste navegador/celular");
+    }
+
+    // Inicializa STT
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.onresult = (event) => {
+        const text = event.results[event.results.length - 1][0].transcript;
+        if (listeningCallback) listeningCallback(text);
+      };
+    }
+  }
 
   function speak(text) {
-    const utter = new SpeechSynthesisUtterance(text);
-    const voice = LionelSettings.getVoice();
-    if(voice === "male") utter.pitch = 0.8;
-    else if(voice === "female") utter.pitch = 1.2;
-    speechSynthesis.speak(utter);
+    if (!text) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voice = LionelSettings.getSetting("voice");
+    if (voice) utterance.voice = speechSynthesis.getVoices().find(v => v.name === voice);
+    speechSynthesis.speak(utterance);
   }
 
   function startListening(callback) {
-    if(!('webkitSpeechRecognition' in window)) return;
-    const recognition = new webkitSpeechRecognition();
-    recognition.lang = 'pt-BR';
-    recognition.onresult = e => callback(e.results[0][0].transcript);
+    if (!recognition) return;
+    listeningCallback = callback;
     recognition.start();
   }
 
-  function stopListening() { console.log("Stop listening"); }
+  function stopListening() {
+    if (!recognition) return;
+    recognition.stop();
+    listeningCallback = null;
+  }
 
   return { init, speak, startListening, stopListening };
 })();
