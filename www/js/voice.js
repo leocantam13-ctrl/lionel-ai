@@ -1,51 +1,14 @@
-/* =========================================================
-   LIONEL VOICE – TTS e STT
-   ========================================================= */
+let recognition;
 
-const LionelVoice = (() => {
-  let recognition;
-  let listeningCallback = null;
+function startListening(callback) {
+  recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = "pt-BR";
+  recognition.onresult = e => callback(e.results[0][0].transcript);
+  recognition.start();
+}
 
-  function init() {
-    console.log("LionelVoice iniciado");
-
-    // Inicializa TTS
-    if (!window.speechSynthesis) {
-      console.warn("TTS não suportado neste navegador/celular");
-    }
-
-    // Inicializa STT
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = false;
-      recognition.onresult = (event) => {
-        const text = event.results[event.results.length - 1][0].transcript;
-        if (listeningCallback) listeningCallback(text);
-      };
-    }
-  }
-
-  function speak(text) {
-    if (!text) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voice = LionelSettings.getSetting("voice");
-    if (voice) utterance.voice = speechSynthesis.getVoices().find(v => v.name === voice);
-    speechSynthesis.speak(utterance);
-  }
-
-  function startListening(callback) {
-    if (!recognition) return;
-    listeningCallback = callback;
-    recognition.start();
-  }
-
-  function stopListening() {
-    if (!recognition) return;
-    recognition.stop();
-    listeningCallback = null;
-  }
-
-  return { init, speak, startListening, stopListening };
-})();
+function speak(text) {
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "pt-BR";
+  speechSynthesis.speak(utter);
+}
