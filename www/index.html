@@ -1,195 +1,57 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Lionel</title>
-
-  <style>
-    body {
-      margin: 0;
-      background: #0f0f0f;
-      font-family: Arial, sans-serif;
-      color: #fff;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    header {
-      background: linear-gradient(90deg, #1a1a1a, #2a1f00);
-      padding: 12px;
-      text-align: center;
-      font-weight: bold;
-      color: #d4af37;
-      font-size: 18px;
-    }
-
-    #tabs {
-      display: flex;
-      background: #111;
-      border-bottom: 1px solid #333;
-    }
-
-    .tab {
-      flex: 1;
-      text-align: center;
-      padding: 10px;
-      cursor: pointer;
-      color: #aaa;
-    }
-
-    .tab.active {
-      color: #d4af37;
-      border-bottom: 2px solid #d4af37;
-    }
-
-    .view {
-      flex: 1;
-      display: none;
-      flex-direction: column;
-    }
-
-    .view.active {
-      display: flex;
-    }
-
-    #chat {
-      padding: 10px;
-      overflow-y: auto;
-      flex: 1;
-    }
-
-    .bubble {
-      max-width: 75%;
-      padding: 10px;
-      margin: 6px 0;
-      border-radius: 12px;
-      line-height: 1.4;
-    }
-
-    .user {
-      align-self: flex-end;
-      background: #2a2a2a;
-    }
-
-    .lionel {
-      align-self: flex-start;
-      background: #1f1f1f;
-      border: 1px solid #d4af37;
-    }
-
-    #inputArea {
-      display: flex;
-      border-top: 1px solid #333;
-    }
-
-    #textInput {
-      flex: 1;
-      padding: 10px;
-      background: #000;
-      color: #fff;
-      border: none;
-      outline: none;
-    }
-
-    #sendBtn {
-      background: #d4af37;
-      color: #000;
-      border: none;
-      padding: 0 16px;
-      cursor: pointer;
-    }
-
-    .panel {
-      padding: 15px;
-    }
-
-    button {
-      background: #d4af37;
-      border: none;
-      padding: 10px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Lionel AI</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
 
-  <header>LIONEL</header>
+<div id="tabs">
+  <button onclick="showTab('chat')">Chat</button>
+  <button onclick="showTab('cameras')">Câmeras</button>
+  <button onclick="showTab('settings')">Configurações</button>
+</div>
 
-  <div id="tabs">
-    <div class="tab active" onclick="showTab('chatView')">Chat</div>
-    <div class="tab" onclick="showTab('cameraView')">Câmeras</div>
-    <div class="tab" onclick="showTab('settingsView')">Configurações</div>
-  </div>
-
+<div id="content">
   <!-- CHAT -->
-  <div id="chatView" class="view active">
-    <div id="chat"></div>
-
-    <div id="inputArea">
-      <input id="textInput" placeholder="Digite ou fale..." />
-      <button id="sendBtn">Enviar</button>
-    </div>
+  <div id="chat" class="tab-content">
+    <div id="chat-history"></div>
+    <input type="text" id="chat-input" placeholder="Escreva aqui...">
+    <button onclick="sendChat()">Enviar</button>
+    <button onclick="LionelCore.startVoiceMode()">🎤 Voz</button>
+    <button onclick="LionelCore.stopVoiceMode()">🛑 Parar Voz</button>
+    <input type="file" id="file-upload" multiple onchange="uploadFiles(this.files)">
   </div>
 
-  <!-- CAMERAS -->
-  <div id="cameraView" class="view">
-    <div class="panel">
-      <p>Câmeras conectadas aparecerão aqui.</p>
-      <p>(IP / Wi-Fi – integração futura)</p>
-    </div>
+  <!-- CÂMERAS -->
+  <div id="cameras" class="tab-content" style="display:none;">
+    <div id="camera-list"></div>
+    <input type="text" id="camera-ip" placeholder="Digite o IP da câmera">
+    <button onclick="CameraManager.addCamera()">Adicionar Câmera</button>
   </div>
 
-  <!-- SETTINGS -->
-  <div id="settingsView" class="view">
-    <div class="panel">
-      <p>Configurações do Lionel</p>
-      <button onclick="LionelVoice.startListening()">Ativar Voz</button>
-      <button onclick="LionelVoice.stopListening()">Desativar Voz</button>
-    </div>
+  <!-- CONFIGURAÇÕES -->
+  <div id="settings" class="tab-content" style="display:none;">
+    <input type="text" id="api-key" placeholder="Insira sua API do Gemini">
+    <button onclick="LionelSettings.saveApiKey(document.getElementById('api-key').value)">Salvar API</button>
+    <input type="text" id="user-name" placeholder="Digite seu nome">
+    <button onclick="LionelSettings.saveUserName(document.getElementById('user-name').value)">Salvar Nome</button>
+    <select id="voice-select" onchange="LionelSettings.changeVoice(this.value)">
+      <option value="default">Padrão</option>
+      <option value="male">Masculina</option>
+      <option value="female">Feminina</option>
+    </select>
   </div>
+</div>
 
-  <!-- SCRIPTS -->
-  <script src="js/memory.js"></script>
-  <script src="js/settings.js"></script>
-  <script src="js/voice.js"></script>
-  <script src="js/index.js"></script>
-
-  <script>
-    function showTab(id) {
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-
-      document.getElementById(id).classList.add('active');
-      event.target.classList.add('active');
-    }
-
-    const chat = document.getElementById("chat");
-    const input = document.getElementById("textInput");
-
-    document.getElementById("sendBtn").onclick = () => {
-      const text = input.value.trim();
-      if (!text) return;
-
-      addBubble(text, "user");
-      LionelCore.handleUserText(text);
-      input.value = "";
-    };
-
-    function addBubble(text, who) {
-      const div = document.createElement("div");
-      div.className = "bubble " + who;
-      div.innerText = text;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    // Expor para o core usar
-    window.addLionelBubble = text => addBubble(text, "lionel");
-  </script>
-
+<script src="js/memory.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/voice.js"></script>
+<script src="js/stt.js"></script>
+<script src="js/camera.js"></script>
+<script src="js/proactive.js"></script>
+<script src="js/assistant.js"></script>
+<script src="js/index.js"></script>
 </body>
 </html>
