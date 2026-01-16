@@ -1,38 +1,51 @@
-document.addEventListener("deviceready", () => {
-  const chat = document.getElementById("chat");
-  const input = document.getElementById("userInput");
+// index.js - Core do chat
+document.addEventListener("DOMContentLoaded", () => {
+  const chatBox = document.getElementById("chat-box");
+  const input = document.getElementById("user-input");
+  const sendBtn = document.getElementById("send-btn");
 
-  function addMsg(text, cls) {
-    const div = document.createElement("div");
-    div.className = `msg ${cls}`;
-    div.textContent = text;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
+  LionelMemory.init();
+  LionelSettings.init();
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if(!text) return;
+
+    addBubble(text, "user");
+    LionelMemory.saveInteraction("user", text);
+    input.value = "";
+
+    const apiKey = LionelSettings.getApiKey();
+    const context = LionelMemory.getContext();
+    const response = await callGeminiAPI(text, context, apiKey);
+
+    addBubble(response, "lionel");
+    LionelMemory.saveInteraction("lionel", response);
   }
 
-  document.getElementById("sendBtn").onclick = async () => {
-    const text = input.value.trim();
-    if (!text) return;
+  function addBubble(text, role) {
+    const div = document.createElement("div");
+    div.className = `bubble ${role}`;
+    div.textContent = text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 
-    input.value = "";
-    addMsg("Você: " + text, "user");
-    Memory.save("user", text);
+  async function callGeminiAPI(text, context, key) {
+    if(!key) return "API Key não configurada!";
+    try {
+      const res = await fetch("https://api.gemini.fake/v1/chat", { // coloque sua API real
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${key}` },
+        body: JSON.stringify({ text, context })
+      });
+      const data = await res.json();
+      return data.reply || "Sem resposta da API.";
+    } catch(e) {
+      return "Erro ao conectar com a API.";
+    }
+  }
 
-    const reply = await askGemini(text);
-    addMsg("Lionel: " + reply, "ai");
-    Memory.save("ai", reply);
-    speak(reply);
-  };
-
-  document.getElementById("micBtn").onclick = () => {
-    startListening(text => {
-      input.value = text;
-    });
-  };
-
-  document.getElementById("saveApi").onclick = () => {
-    const key = document.getElementById("apiKey").value;
-    localStorage.setItem("gemini_api", key);
-    alert("API salva!");
-  };
+  sendBtn.addEventListener("click", sendMessage);
+  input.addEventListener("keypress", e => { if(e.key === "Enter") sendMessage(); });
 });
