@@ -1,16 +1,7 @@
 /* =========================================================
-   LIONEL – CORE BRAIN + GEMINI
-   Inteligência real com memória, voz e contexto
+   LIONEL CORE – Chat + Voz + Memória + Proatividade
    ========================================================= */
 
-// ------------------------
-// IMPORTS (sempre no topo)
-// ------------------------
-import { initSTT, startListening, stopListening } from "./stt.js";
-
-// ------------------------
-// CORE
-// ------------------------
 const LionelCore = (() => {
   let context = {
     lastInteraction: null,
@@ -19,52 +10,41 @@ const LionelCore = (() => {
   };
 
   function init() {
-    console.log("Lionel iniciado");
+    console.log("LionelCore iniciado");
 
-    window.LionelMemory?.init();
-    window.LionelSettings?.init();
-    window.LionelVoice?.init();
+    LionelMemory?.init();
+    LionelSettings?.init();
+    LionelVoice?.init();
+    LionelCameras?.init();
+    LionelNotifications?.init();
 
     startIdleWatcher();
   }
 
   async function handleUserText(text) {
     if (!text) return;
-
     context.lastInteraction = Date.now();
 
-    LionelMemory?.saveInteraction("user", text);
-
+    LionelMemory.saveInteraction("user", text);
     addUserBubble(text);
 
-    const memoryContext = LionelMemory?.getContext?.() || "";
-
-    const response = await LionelGemini.sendText(
-      text,
-      memoryContext
-    );
+    const memoryContext = LionelMemory.getContext();
+    const response = await LionelGemini.sendText(text, memoryContext);
 
     respond(response);
   }
 
   function respond(text) {
     if (!text) return;
-
-    LionelMemory?.saveInteraction("lionel", text);
-
+    LionelMemory.saveInteraction("lionel", text);
     addLionelBubble(text);
-
-    LionelVoice?.speak(text);
+    LionelVoice.speak(text);
   }
 
   function startIdleWatcher() {
     setInterval(() => {
-      if (!context.proactiveEnabled) return;
-      if (!context.lastInteraction) return;
-
-      const idle = Date.now() - context.lastInteraction;
-
-      if (idle > 180000) { // 3 min
+      if (!context.proactiveEnabled || !context.lastInteraction) return;
+      if (Date.now() - context.lastInteraction > 180000) {
         proactiveComment();
         context.lastInteraction = Date.now();
       }
@@ -72,29 +52,12 @@ const LionelCore = (() => {
   }
 
   async function proactiveComment() {
-    const memoryContext = LionelMemory?.getContext?.() || "";
-
+    const memoryContext = LionelMemory.getContext();
     const response = await LionelGemini.sendText(
-      "Faça um comentário curto e amigável para o usuário, como um companheiro.",
+      "Faça um comentário curto e amigável para o usuário.",
       memoryContext
     );
-
     respond(response);
-  }
-
-  function startVoiceMode() {
-    if (context.listening) return;
-
-    LionelVoice?.startListening(text => {
-      handleUserText(text);
-    });
-
-    context.listening = true;
-  }
-
-  function stopVoiceMode() {
-    LionelVoice?.stopListening();
-    context.listening = false;
   }
 
   function addUserBubble(text) {
@@ -105,46 +68,9 @@ const LionelCore = (() => {
     window.addLionelBubble?.(text, "lionel");
   }
 
-  return {
-    init,
-    handleUserText,
-    startVoiceMode,
-    stopVoiceMode
-  };
+  return { init, handleUserText };
 })();
 
-// ------------------------
-// START — DOMContentLoaded
-// ------------------------
 document.addEventListener("DOMContentLoaded", () => {
   LionelCore.init();
-
-  // Inicializa STT
-  initSTT(async (text) => {
-    if (!text) return;
-
-    console.log("Usuário disse:", text);
-
-    // Salvar na memória
-    LionelMemory?.saveInteraction("user", text);
-
-    // Enviar para Gemini com contexto
-    const memoryContext = LionelMemory?.getContext?.() || "";
-    const response = await LionelGemini.sendText(text, memoryContext);
-
-    // Salvar resposta e falar
-    LionelMemory?.saveInteraction("lionel", response);
-    window.addLionelBubble?.(response, "lionel");
-    LionelVoice?.speak(response);
-  });
-
-  // Funções globais para ativar/desativar voz
-  window.LionelCore.startVoiceMode = () => startListening();
-  window.LionelCore.stopVoiceMode = () => stopListening();
-
-  // Inicializa Lionel Proativo
-  LionelProactive?.start();
-
-  // Inicializa Lionel Assistente Total
-  LionelAssistant?.start();
 });
