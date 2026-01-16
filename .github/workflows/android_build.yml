@@ -27,7 +27,7 @@ jobs:
       - name: Prepare Cordova
         run: |
           cordova platform remove android || true
-          cordova platform add android@14.1.0
+          cordova platform add android@14.0.1
           # Plugins compatíveis
           cordova plugin add cordova-plugin-camera@^7.0.0
           cordova plugin add cordova-plugin-file@^8.1.0
