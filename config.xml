@@ -8,10 +8,11 @@
     <preference name="AndroidXEnabled" value="true" />
     <preference name="KeepRunning" value="true" />
     <preference name="MediaPlaybackRequiresUserAction" value="false" />
+    <preference name="AndroidPersistentFileLocation" value="Compatibility" />
 
     <platform name="android">
         <config-file target="AndroidManifest.xml" parent="/*">
-            <!-- Permissões principais -->
+            <!-- Permissões necessárias sem duplicação -->
             <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
             <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
             <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -23,13 +24,11 @@
             <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
             <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
             <uses-permission android:name="android.permission.WAKE_LOCK" />
-            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
             <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
         </config-file>
     </platform>
 
-    <!-- Plugins essenciais -->
+    <!-- Plugins -->
     <plugin name="cordova-plugin-camera" spec="^7.0.0" />
     <plugin name="cordova-plugin-media" spec="^7.0.0" />
     <plugin name="cordova-plugin-file" spec="^8.0.0" />
