@@ -1,11 +1,9 @@
-# LIONEL V4 ELITE - BUILD 2026 - GARRAS E SENTINELA
+# LIONEL V4 ELITE - BUILD CORRIGIDO 2026
 
 name: Build Lionel APK
-
 on:
   push:
     branches: [ main, principal ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,17 +27,17 @@ jobs:
       - name: Prepare Cordova
         run: |
           cordova platform remove android || true
-          cordova platform add android@^14.0.1
-          # Instala plugins
-          cordova plugin add cordova-plugin-android-permissions
-          cordova plugin add cordova-plugin-camera
-          cordova plugin add cordova-plugin-media
-          cordova plugin add cordova-plugin-file
-          cordova plugin add cordova-plugin-background-mode
-          cordova plugin add cordova-plugin-device
+          cordova platform add android@14.1.0
+          # Plugins compatíveis
+          cordova plugin add cordova-plugin-camera@^7.0.0
+          cordova plugin add cordova-plugin-file@^8.1.0
+          cordova plugin add cordova-plugin-background-mode@^0.7.3
+          cordova plugin add cordova-plugin-device@^2.0.3
+          cordova plugin add cordova-plugin-android-permissions@^1.1.5
+          cordova plugin add cordova-plugin-whitelist@^1.3.5
 
       - name: Build APK
-        run: cordova build android
+        run: cordova build android --debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
