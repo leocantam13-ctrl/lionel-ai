@@ -1,17 +1,40 @@
+/* =========================================================
+   LIONEL SETTINGS – Configurações do usuário
+   ========================================================= */
+
 const LionelSettings = (() => {
-  let apiKey = localStorage.getItem("apiKey") || "";
-  let userName = localStorage.getItem("userName") || "Usuário";
-  let voice = localStorage.getItem("voice") || "default";
+  const storageKey = "lionel_settings";
+  let settings = {
+    username: "Usuário",
+    voice: "default",
+    apiKey: "",
+    cameraIPs: [],
+  };
 
-  function init() {}
+  function init() {
+    const saved = localStorage.getItem(storageKey);
+    settings = saved ? JSON.parse(saved) : settings;
+    console.log("LionelSettings carregado:", settings);
+  }
 
-  function saveApiKey(key) { apiKey = key; localStorage.setItem("apiKey", key); }
-  function saveUserName(name) { userName = name; localStorage.setItem("userName", name); }
-  function changeVoice(v) { voice = v; localStorage.setItem("voice", v); }
+  function setSetting(key, value) {
+    settings[key] = value;
+    localStorage.setItem(storageKey, JSON.stringify(settings));
+  }
 
-  function getApiKey() { return apiKey; }
-  function getUserName() { return userName; }
-  function getVoice() { return voice; }
+  function getSetting(key) {
+    return settings[key];
+  }
 
-  return { init, saveApiKey, saveUserName, changeVoice, getApiKey, getUserName, getVoice };
+  function addCamera(ip) {
+    if (!settings.cameraIPs.includes(ip)) settings.cameraIPs.push(ip);
+    localStorage.setItem(storageKey, JSON.stringify(settings));
+  }
+
+  function removeCamera(ip) {
+    settings.cameraIPs = settings.cameraIPs.filter(c => c !== ip);
+    localStorage.setItem(storageKey, JSON.stringify(settings));
+  }
+
+  return { init, setSetting, getSetting, addCamera, removeCamera };
 })();
