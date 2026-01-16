@@ -1,231 +1,36 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lionel AI - Chat e Assistente</title>
-
-<!-- Estilo Gemini Dark/Dourado -->
-<link rel="stylesheet" href="css/style.css">
-<style>
-body {
-  background-color: #121212;
-  color: #FFD700;
-  font-family: 'Arial', sans-serif;
-  margin: 0;
-  padding: 0;
-}
-
-header {
-  background-color: #1f1f1f;
-  padding: 15px;
-  text-align: center;
-  font-size: 1.5em;
-  font-weight: bold;
-  border-bottom: 2px solid #FFD700;
-}
-
-#chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 70vh;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.bubble {
-  padding: 10px 15px;
-  margin: 5px;
-  border-radius: 20px;
-  max-width: 80%;
-  word-wrap: break-word;
-}
-
-.user {
-  background-color: #333;
-  align-self: flex-end;
-  color: #FFD700;
-}
-
-.lionel {
-  background-color: #FFD700;
-  color: #121212;
-  align-self: flex-start;
-}
-
-#input-container {
-  display: flex;
-  padding: 10px;
-  border-top: 1px solid #FFD700;
-}
-
-#user-input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 20px;
-  border: 1px solid #FFD700;
-  background-color: #1f1f1f;
-  color: #FFD700;
-}
-
-#send-btn {
-  margin-left: 10px;
-  padding: 10px 20px;
-  border-radius: 20px;
-  background-color: #FFD700;
-  border: none;
-  color: #121212;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-#tabs {
-  display: flex;
-  justify-content: space-around;
-  background-color: #1f1f1f;
-  border-bottom: 2px solid #FFD700;
-}
-
-.tab {
-  padding: 10px;
-  cursor: pointer;
-  color: #FFD700;
-  font-weight: bold;
-}
-
-.tab.active {
-  border-bottom: 3px solid #FFD700;
-}
-
-#tab-content {
-  padding: 10px;
-}
-
-.camera-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.camera-item {
-  margin-bottom: 10px;
-  padding: 5px;
-  background-color: #333;
-  color: #FFD700;
-  border-radius: 10px;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>Lionel Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<header>Lionel AI</header>
+<header>
+  <h1>🦁 Lionel</h1>
+</header>
 
-<div id="tabs">
-  <div class="tab active" data-tab="chat">Chat</div>
-  <div class="tab" data-tab="cameras">Câmeras</div>
-  <div class="tab" data-tab="settings">Configurações</div>
-</div>
+<main id="chat"></main>
 
-<div id="tab-content">
-  <!-- Chat -->
-  <div id="chat-tab">
-    <div id="chat-container"></div>
-    <div id="input-container">
-      <input type="text" id="user-input" placeholder="Digite sua mensagem...">
-      <button id="send-btn">Enviar</button>
-    </div>
-  </div>
+<footer>
+  <input id="userInput" placeholder="Fale ou digite..." />
+  <button id="micBtn">🎤</button>
+  <button id="sendBtn">➤</button>
+</footer>
 
-  <!-- Câmeras -->
-  <div id="cameras-tab" style="display:none;">
-    <div class="camera-list" id="camera-list"></div>
-    <input type="text" id="camera-ip" placeholder="IP da câmera">
-    <button id="add-camera-btn">Adicionar Câmera</button>
-  </div>
+<section id="settings">
+  <h3>Configurações</h3>
+  <input id="apiKey" placeholder="Cole sua API Gemini" />
+  <button id="saveApi">Salvar API</button>
+</section>
 
-  <!-- Configurações -->
-  <div id="settings-tab" style="display:none;">
-    <label>Nome do Usuário: <input type="text" id="username"></label><br><br>
-    <label>Voz: <input type="text" id="voice"></label><br><br>
-    <label>API Gemini: <input type="text" id="api-key"></label><br><br>
-    <button id="save-settings">Salvar Configurações</button>
-  </div>
-</div>
-
-<!-- Scripts do Lionel -->
+<script src="cordova.js"></script>
 <script src="js/memory.js"></script>
-<script src="js/settings.js"></script>
+<script src="js/gemini.js"></script>
 <script src="js/voice.js"></script>
-<script src="js/notifications.js"></script>
-<script src="js/camera.js"></script>
 <script src="js/index.js"></script>
-
-<script>
-/* Tabs */
-const tabs = document.querySelectorAll(".tab");
-const chatTab = document.getElementById("chat-tab");
-const camerasTab = document.getElementById("cameras-tab");
-const settingsTab = document.getElementById("settings-tab");
-
-tabs.forEach(tab => {
-  tab.addEventListener("click", () => {
-    tabs.forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-    chatTab.style.display = tab.dataset.tab === "chat" ? "block" : "none";
-    camerasTab.style.display = tab.dataset.tab === "cameras" ? "block" : "none";
-    settingsTab.style.display = tab.dataset.tab === "settings" ? "block" : "none";
-  });
-});
-
-/* Chat Input */
-const userInput = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
-sendBtn.addEventListener("click", () => {
-  const text = userInput.value.trim();
-  if(text){
-    LionelCore.handleUserText(text);
-    userInput.value = "";
-  }
-});
-
-/* Configurações */
-document.getElementById("save-settings").addEventListener("click", () => {
-  const username = document.getElementById("username").value;
-  const voice = document.getElementById("voice").value;
-  const apiKey = document.getElementById("api-key").value;
-
-  LionelSettings.setSetting("username", username);
-  LionelSettings.setSetting("voice", voice);
-  LionelSettings.setSetting("apiKey", apiKey);
-
-  alert("Configurações salvas!");
-});
-
-/* Câmeras */
-const cameraList = document.getElementById("camera-list");
-const addCameraBtn = document.getElementById("add-camera-btn");
-const cameraIPInput = document.getElementById("camera-ip");
-
-function updateCameraList(){
-  cameraList.innerHTML = "";
-  LionelCameras.getStreams().forEach(ip => {
-    const div = document.createElement("div");
-    div.classList.add("camera-item");
-    div.textContent = ip;
-    cameraList.appendChild(div);
-  });
-}
-
-addCameraBtn.addEventListener("click", () => {
-  const ip = cameraIPInput.value.trim();
-  if(ip){
-    LionelCameras.addCamera(ip);
-    cameraIPInput.value = "";
-    updateCameraList();
-  }
-});
-
-updateCameraList();
-</script>
 
 </body>
 </html>
