@@ -1,26 +1,21 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.leo.lionel" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android">
+<widget id="com.leo.lionel.v4" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>Lionel AI</name>
-    <description>Lionel v4 - Sentinela Proativo 2026</description>
-    <author email="dev@lionel.ai">Léo &amp; Lionel</author>
+    <description>Sentinela Proativo e Evolutivo 2026</description>
     <content src="index.html" />
-
+    <access origin="*" />
     <preference name="AndroidXEnabled" value="true" />
-
     <platform name="android">
         <config-file target="AndroidManifest.xml" parent="/*">
             <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
             <uses-permission android:name="android.permission.RECORD_AUDIO" />
             <uses-permission android:name="android.permission.CAMERA" />
             <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-            <uses-permission android:name="android.permission.INTERNET" />
             <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
             <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
         </config-file>
     </platform>
-
-    <plugin name="cordova-plugin-android-permissions" spec="^1.1.5" />
-    <access origin="*" />
-    <allow-intent href="http://*/*" />
-    <allow-intent href="https://*/*" />
+    <plugin name="cordova-plugin-camera" spec="^7.0.0" />
+    <plugin name="cordova-plugin-media" spec="^7.0.0" />
+    <plugin name="cordova-plugin-file" spec="^8.0.0" />
 </widget>
