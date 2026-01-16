@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.leo.lionel.v4" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>Lionel AI</name>
-    <description>Sentinela Proativo e Evolutivo 2026 - Léo &amp; Lionel</description>
-    <author email="dev@lionel.ai">Léo</author>
+    <description>Sentinela Proativo e Evolutivo 2026 - Usuário &amp; Lionel</description>
+    <author email="dev@lionel.ai">Usuário</author>
     <content src="index.html" />
     <access origin="*" />
     <preference name="AndroidXEnabled" value="true" />
@@ -24,13 +24,16 @@
             <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
             <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
             <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+            <!-- REMOVIDA DUPLICATA DE WRITE_EXTERNAL_STORAGE -->
+            <!-- Se precisar de acesso externo avançado, use plugins e storage interno -->
             
             <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
             <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
         </config-file>
     </platform>
 
+    <!-- PLUGINS -->
     <plugin name="cordova-plugin-camera" spec="^7.0.0" />
     <plugin name="cordova-plugin-media" spec="^7.0.0" />
     <plugin name="cordova-plugin-file" spec="^8.0.0" />
