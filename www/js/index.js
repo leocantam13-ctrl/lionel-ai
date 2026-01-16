@@ -1,67 +1,76 @@
-document.addEventListener('deviceready', onDeviceReady, false);
+document.addEventListener('deviceready', () => {
+    window.lionelMemory = JSON.parse(localStorage.getItem('lionel_memory')) || { chats: [], userStyle: {}, contacts: {} };
+    loadSettings();
+    renderHistory();
+    startProactiveListener();
+}, false);
 
-let userPersona = "Léo";
-let history = [];
-
-function onDeviceReady() {
-    console.log('Lionel v4 Desperto');
-    setupA11y(); // Inicia Garras de Acessibilidade
-    loadMemory(); // Carrega Gostos e Padrões do usuário
+function saveAll() {
+    const config = {
+        key: document.getElementById('apiKey').value,
+        ai: document.getElementById('aiName').value,
+        user: document.getElementById('userName').value,
+        persona: document.getElementById('personaBio').value,
+        cams: [document.getElementById('cam1').value, document.getElementById('cam2').value],
+        audio: document.getElementById('audioSrc').value
+    };
+    localStorage.setItem('lionel_config', JSON.stringify(config));
+    toggleSettings();
+    addMsg("Lionel", `Configurações atualizadas, ${config.user}. Estou pronto.`);
 }
 
-// Função para enviar mensagem e processar proatividade
-function sendMessage() {
-    const input = document.getElementById('userInput');
-    const text = input.value.trim();
-    
-    if (text === "") return;
+function processInput() {
+    const el = document.getElementById('mainInput');
+    const text = el.value.trim();
+    if(!text) return;
 
-    addChatMessage(text, 'user-msg');
-    processLionelIntelligence(text);
-    input.value = "";
+    addMsg("User", text);
+    el.value = "";
+
+    // Lógica de Proatividade e Inteligência
+    setTimeout(() => {
+        let response = "";
+        if(text.toLowerCase().includes("ajuda")) {
+            response = "Estou analisando o contexto agora. Vou te dar sugestões baseadas no seu jeito de falar.";
+        } else if(text.toLowerCase().includes("pix")) {
+            response = "Atenção: Ação financeira detectada. Léo, confirme se os dados estão corretos antes de eu usar minhas garras.";
+        } else {
+            response = "Entendido. Memorizado e pronto para evoluir com essa informação.";
+        }
+        addMsg("Lionel", response);
+        learnFromUser(text);
+    }, 800);
 }
 
-function addChatMessage(text, type) {
-    const chatFlow = document.getElementById('chat-flow');
+function learnFromUser(input) {
+    // Mimetismo de estilo e memória de longo prazo
+    window.lionelMemory.chats.push({t: Date.now(), msg: input});
+    localStorage.setItem('lionel_memory', JSON.stringify(window.lionelMemory));
+}
+
+function addMsg(sender, text) {
+    const container = document.getElementById('chat-container');
     const div = document.createElement('div');
-    div.className = `msg ${type}`;
+    div.className = `msg ${sender === 'User' ? 'user' : 'lionel'}`;
     div.innerText = text;
-    chatFlow.appendChild(div);
-    chatFlow.scrollTop = chatFlow.scrollHeight;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
 }
 
-// O Coração: Inteligência e Aprendizado
-async function processLionelIntelligence(input) {
-    // 1. Simulação de análise de contexto
-    if(input.toLowerCase().includes("ajuda na entrevista")) {
-        addChatMessage("Modo Entrevista ativado. Vou ouvir o recrutador e te sugerir respostas no fone usando seu estilo habitual, Léo.", 'lionel-msg');
-    } 
-    else if(input.toLowerCase().includes("pix")) {
-        addChatMessage("Ação de PIX detectada. Léo, confirme os dados antes de eu usar minhas garras para concluir. Segurança em primeiro lugar.", 'lionel-msg');
-    }
-    else {
-        // Resposta padrão adaptativa
-        setTimeout(() => {
-            addChatMessage("Entendido. Memorizei essa nova instrução e vou aplicar ao meu comportamento proativo agora.", 'lionel-msg');
-        }, 1000);
-    }
-    
-    // Salva na memória de longo prazo
-    saveToMemory(input);
-}
-
-function saveToMemory(data) {
-    history.push({date: new Date(), content: data});
-    localStorage.setItem('lionel_memory', JSON.stringify(history));
-}
-
-function loadMemory() {
-    const mem = localStorage.getItem('lionel_memory');
-    if(mem) history = JSON.parse(mem);
-}
-
-function toggleMenu() {
+function toggleSettings() {
     document.getElementById('settings').classList.toggle('active');
 }
 
-document.getElementById('sendBtn').addEventListener('click', sendMessage);
+function startProactiveListener() {
+    // Simulação de escuta proativa (Numbers/Dates)
+    console.log("Lionel ouvindo ambiente...");
+}
+
+function loadSettings() {
+    const s = JSON.parse(localStorage.getItem('lionel_config'));
+    if(s) {
+        document.getElementById('apiKey').value = s.key;
+        document.getElementById('aiName').value = s.ai;
+        document.getElementById('userName').value = s.user;
+    }
+}
