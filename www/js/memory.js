@@ -1,36 +1,31 @@
+/* =========================================================
+   LIONEL MEMORY – Guarda interações do usuário e IA
+   ========================================================= */
+
 const LionelMemory = (() => {
-  const interactions = [];
+  const storageKey = "lionel_memory";
+  let memoryData = [];
 
   function init() {
-    const stored = localStorage.getItem("lionelMemory");
-    if(stored) {
-      const data = JSON.parse(stored);
-      interactions.push(...data);
-      renderHistory();
-    }
+    const saved = localStorage.getItem(storageKey);
+    memoryData = saved ? JSON.parse(saved) : [];
+    console.log("LionelMemory iniciado:", memoryData.length, "interações carregadas");
   }
 
-  function saveInteraction(actor, text) {
-    interactions.push({actor, text, timestamp: Date.now()});
-    localStorage.setItem("lionelMemory", JSON.stringify(interactions));
-    renderHistory();
+  function saveInteraction(author, text) {
+    const timestamp = new Date().toISOString();
+    memoryData.push({ author, text, timestamp });
+    localStorage.setItem(storageKey, JSON.stringify(memoryData));
   }
 
-  function getContext() {
-    return interactions.map(i => `${i.actor}: ${i.text}`).join("\n");
+  function getContext(limit = 10) {
+    return memoryData.slice(-limit).map(i => `${i.author}: ${i.text}`).join("\n");
   }
 
-  function renderHistory() {
-    const chat = document.getElementById("chat-history");
-    if(!chat) return;
-    chat.innerHTML = "";
-    interactions.forEach(i => {
-      const div = document.createElement("div");
-      div.className = i.actor === "lionel" ? "lionel-bubble" : "user-bubble";
-      div.innerText = i.text;
-      chat.appendChild(div);
-    });
+  function clearMemory() {
+    memoryData = [];
+    localStorage.removeItem(storageKey);
   }
 
-  return { init, saveInteraction, getContext };
+  return { init, saveInteraction, getContext, clearMemory };
 })();
