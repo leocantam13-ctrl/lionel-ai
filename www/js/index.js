@@ -1,9 +1,7 @@
 /* =========================================================
-   LIONEL – CORE BRAIN (index.js)
-   Orquestrador geral: memória, voz, contexto e proatividade
+   LIONEL – CORE BRAIN + GEMINI
+   Inteligência real com memória, voz e contexto
    ========================================================= */
-
-/* ---------- ESTADO GLOBAL ---------- */
 
 const LionelCore = (() => {
   let context = {
@@ -17,87 +15,42 @@ const LionelCore = (() => {
   function init() {
     console.log("Lionel iniciado");
 
-    if (window.LionelMemory) {
-      LionelMemory.init();
-    }
-
-    if (window.LionelSettings) {
-      LionelSettings.init();
-    }
-
-    if (window.LionelVoice) {
-      LionelVoice.init();
-    }
+    window.LionelMemory?.init();
+    window.LionelSettings?.init();
+    window.LionelVoice?.init();
 
     startIdleWatcher();
   }
 
-  /* ---------- INTERAÇÃO ---------- */
+  /* ---------- INTERAÇÃO PRINCIPAL ---------- */
 
-  function handleUserText(text) {
+  async function handleUserText(text) {
     if (!text) return;
 
     context.lastInteraction = Date.now();
 
-    if (window.LionelMemory) {
-      LionelMemory.saveInteraction("user", text);
-    }
+    LionelMemory?.saveInteraction("user", text);
 
-    const response = generateResponse(text);
+    addUserBubble(text);
 
-    speakResponse(response);
+    const memoryContext = LionelMemory?.getContext?.() || "";
+
+    const response = await LionelGemini.sendText(
+      text,
+      memoryContext
+    );
+
+    respond(response);
   }
 
-  function generateResponse(text) {
-    // Base inicial – depois será substituída por Gemini API
-    const lower = text.toLowerCase();
+  function respond(text) {
+    if (!text) return;
 
-    if (lower.includes("quem é você")) {
-      return "Sou o Lionel. Estou aqui para te acompanhar no dia a dia.";
-    }
+    LionelMemory?.saveInteraction("lionel", text);
 
-    if (lower.includes("fica quieto")) {
-      context.proactiveEnabled = false;
-      return "Tudo bem. Vou ficar mais quieto por enquanto.";
-    }
+    addLionelBubble(text);
 
-    if (lower.includes("pode falar")) {
-      context.proactiveEnabled = true;
-      return "Certo. Volto a comentar quando achar necessário.";
-    }
-
-    return "Entendi. Vou levar isso em conta.";
-  }
-
-  function speakResponse(text) {
-    if (window.LionelVoice) {
-      LionelVoice.speak(text);
-    }
-
-    if (window.LionelMemory) {
-      LionelMemory.saveInteraction("lionel", text);
-    }
-  }
-
-  /* ---------- VOZ ---------- */
-
-  function startVoiceMode() {
-    if (!window.LionelVoice) return;
-
-    if (context.listening) return;
-
-    LionelVoice.startListening(result => {
-      handleUserText(result);
-    });
-
-    context.listening = true;
-  }
-
-  function stopVoiceMode() {
-    if (!window.LionelVoice) return;
-
-    LionelVoice.stopListening();
-    context.listening = false;
+    LionelVoice?.speak(text);
   }
 
   /* ---------- PROATIVIDADE ---------- */
@@ -105,31 +58,53 @@ const LionelCore = (() => {
   function startIdleWatcher() {
     setInterval(() => {
       if (!context.proactiveEnabled) return;
-
-      const now = Date.now();
       if (!context.lastInteraction) return;
 
-      const idleTime = now - context.lastInteraction;
+      const idle = Date.now() - context.lastInteraction;
 
-      // 2 minutos sem interação
-      if (idleTime > 120000) {
+      if (idle > 180000) { // 3 min
         proactiveComment();
-        context.lastInteraction = now;
+        context.lastInteraction = Date.now();
       }
     }, 30000);
   }
 
-  function proactiveComment() {
-    const phrases = [
-      "Se quiser, posso te ajudar em algo agora.",
-      "Estou aqui, caso precise.",
-      "Quer que eu fique de olho em alguma coisa?"
-    ];
+  async function proactiveComment() {
+    const memoryContext = LionelMemory?.getContext?.() || "";
 
-    const msg =
-      phrases[Math.floor(Math.random() * phrases.length)];
+    const response = await LionelGemini.sendText(
+      "Faça um comentário curto e amigável para o usuário, como um companheiro.",
+      memoryContext
+    );
 
-    speakResponse(msg);
+    respond(response);
+  }
+
+  /* ---------- VOZ ---------- */
+
+  function startVoiceMode() {
+    if (context.listening) return;
+
+    LionelVoice?.startListening(text => {
+      handleUserText(text);
+    });
+
+    context.listening = true;
+  }
+
+  function stopVoiceMode() {
+    LionelVoice?.stopListening();
+    context.listening = false;
+  }
+
+  /* ---------- UI HELPERS ---------- */
+
+  function addUserBubble(text) {
+    window.addLionelBubble?.(text, "user");
+  }
+
+  function addLionelBubble(text) {
+    window.addLionelBubble?.(text, "lionel");
   }
 
   /* ---------- API ---------- */
