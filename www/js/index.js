@@ -3,6 +3,15 @@
    Inteligência real com memória, voz e contexto
    ========================================================= */
 
+// ------------------------
+// IMPORTS (sempre no topo)
+// ------------------------
+import { initSTT, startListening, stopListening } from "./stt.js";
+
+// ------------------------
+// CORE
+// ------------------------
+
 const LionelCore = (() => {
   let context = {
     lastInteraction: null,
@@ -117,8 +126,33 @@ const LionelCore = (() => {
   };
 })();
 
-/* ---------- START ---------- */
+// ------------------------
+// START — DOMContentLoaded
+// ------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
   LionelCore.init();
+
+  // Inicializa STT
+  initSTT(async (text) => {
+    if (!text) return;
+
+    console.log("Usuário disse:", text);
+
+    // Salvar na memória
+    LionelMemory?.saveInteraction("user", text);
+
+    // Enviar para Gemini com contexto
+    const memoryContext = LionelMemory?.getContext?.() || "";
+    const response = await LionelGemini.sendText(text, memoryContext);
+
+    // Salvar resposta e falar
+    LionelMemory?.saveInteraction("lionel", response);
+    window.addLionelBubble?.(response, "lionel");
+    LionelVoice?.speak(response);
+  });
+
+  // Funções globais para ativar/desativar voz
+  window.LionelCore.startVoiceMode = () => startListening();
+  window.LionelCore.stopVoiceMode = () => stopListening();
 });
