@@ -11,15 +11,12 @@ import { initSTT, startListening, stopListening } from "./stt.js";
 // ------------------------
 // CORE
 // ------------------------
-
 const LionelCore = (() => {
   let context = {
     lastInteraction: null,
     proactiveEnabled: true,
     listening: false
   };
-
-  /* ---------- INIT ---------- */
 
   function init() {
     console.log("Lionel iniciado");
@@ -30,8 +27,6 @@ const LionelCore = (() => {
 
     startIdleWatcher();
   }
-
-  /* ---------- INTERAÇÃO PRINCIPAL ---------- */
 
   async function handleUserText(text) {
     if (!text) return;
@@ -62,8 +57,6 @@ const LionelCore = (() => {
     LionelVoice?.speak(text);
   }
 
-  /* ---------- PROATIVIDADE ---------- */
-
   function startIdleWatcher() {
     setInterval(() => {
       if (!context.proactiveEnabled) return;
@@ -89,8 +82,6 @@ const LionelCore = (() => {
     respond(response);
   }
 
-  /* ---------- VOZ ---------- */
-
   function startVoiceMode() {
     if (context.listening) return;
 
@@ -106,8 +97,6 @@ const LionelCore = (() => {
     context.listening = false;
   }
 
-  /* ---------- UI HELPERS ---------- */
-
   function addUserBubble(text) {
     window.addLionelBubble?.(text, "user");
   }
@@ -115,8 +104,6 @@ const LionelCore = (() => {
   function addLionelBubble(text) {
     window.addLionelBubble?.(text, "lionel");
   }
-
-  /* ---------- API ---------- */
 
   return {
     init,
@@ -129,7 +116,6 @@ const LionelCore = (() => {
 // ------------------------
 // START — DOMContentLoaded
 // ------------------------
-
 document.addEventListener("DOMContentLoaded", () => {
   LionelCore.init();
 
@@ -155,4 +141,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Funções globais para ativar/desativar voz
   window.LionelCore.startVoiceMode = () => startListening();
   window.LionelCore.stopVoiceMode = () => stopListening();
+
+  // Inicializa Lionel Proativo
+  LionelProactive?.start();
+
+  // Inicializa Lionel Assistente Total
+  LionelAssistant?.start();
 });
