@@ -1,15 +1,19 @@
-const Memory = {
-  save(role, text) {
-    let history = JSON.parse(localStorage.getItem("lionel_memory")) || [];
-    history.push({ role, text });
-    localStorage.setItem("lionel_memory", JSON.stringify(history));
-  },
+// memory.js - Guarda histórico simples
+const LionelMemory = (() => {
+  let history = [];
 
-  load() {
-    return JSON.parse(localStorage.getItem("lionel_memory")) || [];
-  },
-
-  clear() {
-    localStorage.removeItem("lionel_memory");
+  function init() {
+    history = JSON.parse(localStorage.getItem("lionelHistory") || "[]");
   }
-};
+
+  function saveInteraction(role, text) {
+    history.push({ role, text, time: Date.now() });
+    localStorage.setItem("lionelHistory", JSON.stringify(history));
+  }
+
+  function getContext() {
+    return history.map(msg => `${msg.role}: ${msg.text}`).join("\n");
+  }
+
+  return { init, saveInteraction, getContext };
+})();
