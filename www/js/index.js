@@ -1,76 +1,38 @@
-/* =========================================================
-   LIONEL CORE – Chat + Voz + Memória + Proatividade
-   ========================================================= */
+document.addEventListener("deviceready", () => {
+  const chat = document.getElementById("chat");
+  const input = document.getElementById("userInput");
 
-const LionelCore = (() => {
-  let context = {
-    lastInteraction: null,
-    proactiveEnabled: true,
-    listening: false
+  function addMsg(text, cls) {
+    const div = document.createElement("div");
+    div.className = `msg ${cls}`;
+    div.textContent = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  document.getElementById("sendBtn").onclick = async () => {
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = "";
+    addMsg("Você: " + text, "user");
+    Memory.save("user", text);
+
+    const reply = await askGemini(text);
+    addMsg("Lionel: " + reply, "ai");
+    Memory.save("ai", reply);
+    speak(reply);
   };
 
-  function init() {
-    console.log("LionelCore iniciado");
+  document.getElementById("micBtn").onclick = () => {
+    startListening(text => {
+      input.value = text;
+    });
+  };
 
-    LionelMemory?.init();
-    LionelSettings?.init();
-    LionelVoice?.init();
-    LionelCameras?.init();
-    LionelNotifications?.init();
-
-    startIdleWatcher();
-  }
-
-  async function handleUserText(text) {
-    if (!text) return;
-    context.lastInteraction = Date.now();
-
-    LionelMemory.saveInteraction("user", text);
-    addUserBubble(text);
-
-    const memoryContext = LionelMemory.getContext();
-    const response = await LionelGemini.sendText(text, memoryContext);
-
-    respond(response);
-  }
-
-  function respond(text) {
-    if (!text) return;
-    LionelMemory.saveInteraction("lionel", text);
-    addLionelBubble(text);
-    LionelVoice.speak(text);
-  }
-
-  function startIdleWatcher() {
-    setInterval(() => {
-      if (!context.proactiveEnabled || !context.lastInteraction) return;
-      if (Date.now() - context.lastInteraction > 180000) {
-        proactiveComment();
-        context.lastInteraction = Date.now();
-      }
-    }, 30000);
-  }
-
-  async function proactiveComment() {
-    const memoryContext = LionelMemory.getContext();
-    const response = await LionelGemini.sendText(
-      "Faça um comentário curto e amigável para o usuário.",
-      memoryContext
-    );
-    respond(response);
-  }
-
-  function addUserBubble(text) {
-    window.addLionelBubble?.(text, "user");
-  }
-
-  function addLionelBubble(text) {
-    window.addLionelBubble?.(text, "lionel");
-  }
-
-  return { init, handleUserText };
-})();
-
-document.addEventListener("DOMContentLoaded", () => {
-  LionelCore.init();
+  document.getElementById("saveApi").onclick = () => {
+    const key = document.getElementById("apiKey").value;
+    localStorage.setItem("gemini_api", key);
+    alert("API salva!");
+  };
 });
