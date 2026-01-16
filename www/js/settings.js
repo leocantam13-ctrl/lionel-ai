@@ -1,40 +1,51 @@
 /* =========================================================
-   LIONEL SETTINGS – Configurações do usuário
+   LIONEL VOICE – TTS e STT
    ========================================================= */
 
-const LionelSettings = (() => {
-  const storageKey = "lionel_settings";
-  let settings = {
-    username: "Usuário",
-    voice: "default",
-    apiKey: "",
-    cameraIPs: [],
-  };
+const LionelVoice = (() => {
+  let recognition;
+  let listeningCallback = null;
 
   function init() {
-    const saved = localStorage.getItem(storageKey);
-    settings = saved ? JSON.parse(saved) : settings;
-    console.log("LionelSettings carregado:", settings);
+    console.log("LionelVoice iniciado");
+
+    // Inicializa TTS
+    if (!window.speechSynthesis) {
+      console.warn("TTS não suportado neste navegador/celular");
+    }
+
+    // Inicializa STT
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.onresult = (event) => {
+        const text = event.results[event.results.length - 1][0].transcript;
+        if (listeningCallback) listeningCallback(text);
+      };
+    }
   }
 
-  function setSetting(key, value) {
-    settings[key] = value;
-    localStorage.setItem(storageKey, JSON.stringify(settings));
+  function speak(text) {
+    if (!text) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voice = LionelSettings.getSetting("voice");
+    if (voice) utterance.voice = speechSynthesis.getVoices().find(v => v.name === voice);
+    speechSynthesis.speak(utterance);
   }
 
-  function getSetting(key) {
-    return settings[key];
+  function startListening(callback) {
+    if (!recognition) return;
+    listeningCallback = callback;
+    recognition.start();
   }
 
-  function addCamera(ip) {
-    if (!settings.cameraIPs.includes(ip)) settings.cameraIPs.push(ip);
-    localStorage.setItem(storageKey, JSON.stringify(settings));
+  function stopListening() {
+    if (!recognition) return;
+    recognition.stop();
+    listeningCallback = null;
   }
 
-  function removeCamera(ip) {
-    settings.cameraIPs = settings.cameraIPs.filter(c => c !== ip);
-    localStorage.setItem(storageKey, JSON.stringify(settings));
-  }
-
-  return { init, setSetting, getSetting, addCamera, removeCamera };
+  return { init, speak, startListening, stopListening };
 })();
