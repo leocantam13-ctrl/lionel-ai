@@ -1,120 +1,17 @@
-// ================================
-// LIONEL - SETTINGS CORE
-// settings.js
-// ================================
+const LionelSettings = (() => {
+  let apiKey = localStorage.getItem("apiKey") || "";
+  let userName = localStorage.getItem("userName") || "Usuário";
+  let voice = localStorage.getItem("voice") || "default";
 
-import { remember, recall } from "./memory.js";
+  function init() {}
 
-// ---------- DEFAULT SETTINGS ----------
-const DEFAULT_SETTINGS = {
-  assistant: {
-    name: "Lionel"
-  },
+  function saveApiKey(key) { apiKey = key; localStorage.setItem("apiKey", key); }
+  function saveUserName(name) { userName = name; localStorage.setItem("userName", name); }
+  function changeVoice(v) { voice = v; localStorage.setItem("voice", v); }
 
-  user: {
-    name: null,
-    address: "usuario" // usuario | nome | apelido
-  },
+  function getApiKey() { return apiKey; }
+  function getUserName() { return userName; }
+  function getVoice() { return voice; }
 
-  api: {
-    provider: "gemini",
-    apiKey: null,
-    model: "gemini-1.5-flash"
-  },
-
-  voice: {
-    enabled: true,
-    rate: 1.0,
-    pitch: 1.0,
-    volume: 1.0,
-    autoAdapt: true
-  },
-
-  behavior: {
-    proactive: true,
-    verbosity: "normal", // curto | normal | longo
-    humor: "equilibrado" // serio | equilibrado | descontraido
-  }
-};
-
-// ---------- INIT ----------
-export function initSettings() {
-  let settings = recall("settings");
-
-  if (!settings) {
-    remember("settings", DEFAULT_SETTINGS);
-    settings = DEFAULT_SETTINGS;
-  }
-
-  return settings;
-}
-
-// ---------- GET ----------
-export function getSettings() {
-  return recall("settings") || DEFAULT_SETTINGS;
-}
-
-// ---------- SAVE ----------
-function save(settings) {
-  remember("settings", settings);
-}
-
-// ---------- ASSISTANT ----------
-export function setAssistantName(name) {
-  const s = getSettings();
-  s.assistant.name = name;
-  save(s);
-}
-
-export function getAssistantName() {
-  return getSettings().assistant.name;
-}
-
-// ---------- USER ----------
-export function setUserName(name) {
-  const s = getSettings();
-  s.user.name = name;
-  s.user.address = "nome";
-  save(s);
-}
-
-export function getUserAddress() {
-  const s = getSettings();
-  if (s.user.name && s.user.address === "nome") {
-    return s.user.name;
-  }
-  return "usuário";
-}
-
-// ---------- API ----------
-export function setApiKey(key) {
-  const s = getSettings();
-  s.api.apiKey = key;
-  save(s);
-}
-
-export function getApiConfig() {
-  return getSettings().api;
-}
-
-// ---------- VOICE ----------
-export function setVoiceConfig(config) {
-  const s = getSettings();
-  s.voice = { ...s.voice, ...config };
-  save(s);
-}
-
-export function getVoiceConfig() {
-  return getSettings().voice;
-}
-
-// ---------- BEHAVIOR ----------
-export function setBehavior(config) {
-  const s = getSettings();
-  s.behavior = { ...s.behavior, ...config };
-  save(s);
-}
-
-export function getBehavior() {
-  return getSettings().behavior;
-}
+  return { init, saveApiKey, saveUserName, changeVoice, getApiKey, getUserName, getVoice };
+})();
