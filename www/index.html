@@ -10,7 +10,7 @@ body {
   margin: 0;
   background: #0b0b0f;
   color: #f5f5f5;
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -18,194 +18,133 @@ body {
 
 header {
   padding: 12px;
+  background: linear-gradient(90deg,#1a1a1a,#2a1f0f);
+  color: #d4af37;
   text-align: center;
-  background: linear-gradient(90deg, #1a1a1a, #2a1f0f);
-  color: #d4af37;
   font-weight: bold;
-  position: relative;
-}
-
-#settingsBtn {
-  position: absolute;
-  right: 12px;
-  top: 10px;
-  background: none;
-  border: none;
-  color: #d4af37;
-  font-size: 20px;
 }
 
 #chat {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
   overflow-y: auto;
 }
 
 .msg {
   margin-bottom: 10px;
+  max-width: 80%;
   padding: 10px;
   border-radius: 10px;
-  max-width: 80%;
 }
 
-.user { background: #1e1e2e; margin-left: auto; }
-.lionel { background: #2a1f0f; color: #f0d77a; }
+.user {
+  background: #1e1e2e;
+  margin-left: auto;
+}
+
+.lionel {
+  background: #2a1f0f;
+  color: #f0d77a;
+}
 
 footer {
   display: flex;
-  gap: 6px;
-  padding: 8px;
-  background: #111;
-}
-
-input {
-  flex: 1;
   padding: 10px;
-  border-radius: 8px;
-  border: none;
+  background: #111;
+  gap: 8px;
 }
 
 button {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+  flex: 1;
+  padding: 12px;
   border: none;
-  font-size: 18px;
+  border-radius: 8px;
   background: #d4af37;
-}
-
-#cameraBox {
-  display: none;
-  background: black;
-}
-
-video {
-  width: 100%;
-}
-
-#settings {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.9);
-  padding: 20px;
+  font-weight: bold;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-👁️ Lionel — companheiro
-<button id="settingsBtn">⚙️</button>
-</header>
-
-<div id="cameraBox">
-<video id="video" autoplay muted></video>
-</div>
+<header>👁️ Lionel — Modo Companheiro</header>
 
 <div id="chat"></div>
 
 <footer>
-<input id="input" placeholder="Fale ou digite…" />
-<button id="micBtn">🎤</button>
-<button id="camBtn">📷</button>
+  <button onclick="startCompanion()">▶️ Iniciar Modo Companheiro</button>
+  <button onclick="stopCompanion()">⛔ Parar</button>
 </footer>
-
-<div id="settings">
-<h3>Configurações</h3>
-<input id="aiName" placeholder="Nome do assistente">
-<input id="apiKey" placeholder="Chave da API">
-<button onclick="saveSettings()">Salvar</button>
-<button onclick="closeSettings()">Fechar</button>
-</div>
 
 <script>
 const chat = document.getElementById("chat");
-const input = document.getElementById("input");
-const micBtn = document.getElementById("micBtn");
-const camBtn = document.getElementById("camBtn");
-const video = document.getElementById("video");
-const cameraBox = document.getElementById("cameraBox");
 
-let cameraOn = false;
-
-function addMessage(text, who) {
+function addMessage(text, who){
   const div = document.createElement("div");
   div.className = "msg " + who;
-  div.textContent = text;
+  div.innerText = text;
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
 
-function speak(text) {
+function speak(text){
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "pt-BR";
   speechSynthesis.speak(u);
 }
 
-function lionelReply(text) {
-  let reply = "Estou aqui com você.";
-  if (cameraOn) reply = "Estou te vendo agora.";
-  addMessage(reply, "lionel");
-  speak(reply);
-}
-
-/* VOZ */
 let recognition;
+let companionActive = false;
+
 if ("webkitSpeechRecognition" in window) {
   recognition = new webkitSpeechRecognition();
   recognition.lang = "pt-BR";
-  recognition.onresult = e => {
-    const text = e.results[0][0].transcript;
+  recognition.continuous = true;
+  recognition.interimResults = false;
+
+  recognition.onresult = (event) => {
+    if (!companionActive) return;
+
+    const text = event.results[event.results.length - 1][0].transcript;
     addMessage(text, "user");
-    lionelReply(text);
+
+    // Comentário proativo
+    setTimeout(() => {
+      const reply = generateComment(text);
+      addMessage(reply, "lionel");
+      speak(reply);
+    }, 700);
   };
 }
 
-micBtn.onclick = () => recognition && recognition.start();
+function generateComment(text){
+  const lower = text.toLowerCase();
 
-/* CÂMERA */
-camBtn.onclick = async () => {
-  if (!cameraOn) {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
-    cameraBox.style.display = "block";
-    cameraOn = true;
-    addMessage("Câmera ativada.", "lionel");
-    speak("Câmera ativada.");
-    analyzeEnvironment();
-  } else {
-    video.srcObject.getTracks().forEach(t => t.stop());
-    cameraBox.style.display = "none";
-    cameraOn = false;
-    addMessage("Câmera desligada.", "lionel");
-    speak("Câmera desligada.");
+  if (lower.includes("número")) return "Quer que eu salve esse número pra você?";
+  if (lower.includes("hora") || lower.includes("horas")) return "Quer que eu crie um alarme pra isso?";
+  if (lower.includes("difícil")) return "Percebi um clima tenso aí… quer ajuda pra responder?";
+  if (lower.includes("engraçado")) return "Confesso que essa foi boa 😄";
+
+  return "Entendi… estou acompanhando aqui.";
+}
+
+function startCompanion(){
+  if (!recognition) {
+    alert("Reconhecimento de voz não disponível.");
+    return;
   }
-};
-
-/* ANÁLISE SIMPLES */
-function analyzeEnvironment() {
-  if (!cameraOn) return;
-  setTimeout(() => {
-    addMessage("Percebo movimento ou presença.", "lionel");
-    speak("Percebo movimento ou presença.");
-    analyzeEnvironment();
-  }, 15000);
+  companionActive = true;
+  addMessage("Modo companheiro ativado. Estou ouvindo.", "lionel");
+  speak("Modo companheiro ativado. Estou ouvindo.");
+  recognition.start();
 }
 
-/* CONFIG */
-const settings = document.getElementById("settings");
-document.getElementById("settingsBtn").onclick = () => settings.style.display = "block";
-function closeSettings(){ settings.style.display="none"; }
-function saveSettings(){
-  localStorage.setItem("lionel_api", apiKey.value);
-  localStorage.setItem("lionel_name", aiName.value);
-  closeSettings();
+function stopCompanion(){
+  companionActive = false;
+  if (recognition) recognition.stop();
+  addMessage("Modo companheiro desativado.", "lionel");
+  speak("Modo companheiro desativado.");
 }
-
-addMessage("Oi. Pode falar comigo quando quiser.", "lionel");
-speak("Oi. Pode falar comigo quando quiser.");
 </script>
 
 </body>
