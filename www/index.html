@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lionel</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #0b0b0f;
+      color: #f5f5f5;
+      font-family: Arial, Helvetica, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      padding: 12px;
+      text-align: center;
+      background: linear-gradient(90deg, #1a1a1a, #2a1f0f);
+      color: #d4af37;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    #chat {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+    }
+
+    .msg {
+      margin-bottom: 10px;
+      max-width: 80%;
+      padding: 10px;
+      border-radius: 10px;
+      line-height: 1.4;
+    }
+
+    .user {
+      background: #1e1e2e;
+      align-self: flex-end;
+      margin-left: auto;
+    }
+
+    .lionel {
+      background: #2a1f0f;
+      color: #f0d77a;
+      align-self: flex-start;
+    }
+
+    footer {
+      display: flex;
+      padding: 10px;
+      background: #111;
+      gap: 8px;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+    }
+
+    button {
+      background: #d4af37;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>👁️ Lionel — seu companheiro</header>
+
+  <div id="chat"></div>
+
+  <footer>
+    <input id="input" placeholder="Digite ou toque no microfone…" />
+    <button id="micBtn">🎤</button>
+  </footer>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("input");
+    const micBtn = document.getElementById("micBtn");
+
+    function addMessage(text, who) {
+      const div = document.createElement("div");
+      div.className = "msg " + who;
+      div.textContent = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function lionelReply(userText) {
+      // resposta simples por enquanto (depois ligamos na API)
+      setTimeout(() => {
+        addMessage("Entendi. Estou aqui com você.", "lionel");
+        speak("Entendi. Estou aqui com você.");
+      }, 600);
+    }
+
+    // Texto → resposta
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && input.value.trim() !== "") {
+        const text = input.value;
+        input.value = "";
+        addMessage(text, "user");
+        lionelReply(text);
+      }
+    });
+
+    // Voz
+    let recognition;
+    if ("webkitSpeechRecognition" in window) {
+      recognition = new webkitSpeechRecognition();
+      recognition.lang = "pt-BR";
+      recognition.continuous = false;
+
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        addMessage(text, "user");
+        lionelReply(text);
+      };
+    }
+
+    micBtn.onclick = () => {
+      if (recognition) {
+        recognition.start();
+      } else {
+        alert("Reconhecimento de voz não disponível.");
+      }
+    };
+
+    // Fala do Lionel
+    function speak(text) {
+      if ("speechSynthesis" in window) {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "pt-BR";
+        speechSynthesis.speak(utter);
+      }
+    }
+
+    // Mensagem inicial
+    addMessage("Oi. Pode falar comigo quando quiser.", "lionel");
+    speak("Oi. Pode falar comigo quando quiser.");
+  </script>
+
+</body>
+</html>
