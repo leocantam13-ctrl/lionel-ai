@@ -23,6 +23,18 @@
       color: #d4af37;
       font-weight: bold;
       letter-spacing: 1px;
+      position: relative;
+    }
+
+    #settingsBtn {
+      position: absolute;
+      right: 12px;
+      top: 10px;
+      background: transparent;
+      border: none;
+      color: #d4af37;
+      font-size: 20px;
+      cursor: pointer;
     }
 
     #chat {
@@ -80,12 +92,33 @@
     button:active {
       transform: scale(0.95);
     }
+
+    #settings {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      color: #fff;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    #settings input {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+    }
   </style>
 </head>
 
 <body>
 
-  <header>👁️ Lionel — seu companheiro</header>
+  <header>
+    👁️ Lionel — seu companheiro
+    <button id="settingsBtn">⚙️</button>
+  </header>
 
   <div id="chat"></div>
 
@@ -94,10 +127,33 @@
     <button id="micBtn">🎤</button>
   </footer>
 
+  <!-- CONFIGURAÇÕES -->
+  <div id="settings">
+    <h3>Configurações do Lionel</h3>
+
+    <label>Nome do assistente</label>
+    <input id="aiName" placeholder="Lionel" />
+
+    <label>Chave da API</label>
+    <input id="apiKey" placeholder="sk-..." />
+
+    <button onclick="saveSettings()">Salvar</button>
+    <button onclick="closeSettings()">Fechar</button>
+  </div>
+
   <script>
     const chat = document.getElementById("chat");
     const input = document.getElementById("input");
     const micBtn = document.getElementById("micBtn");
+
+    const settingsDiv = document.getElementById("settings");
+    const settingsBtn = document.getElementById("settingsBtn");
+    const apiKeyInput = document.getElementById("apiKey");
+    const aiNameInput = document.getElementById("aiName");
+
+    function getAIName() {
+      return localStorage.getItem("lionel_name") || "Lionel";
+    }
 
     function addMessage(text, who) {
       const div = document.createElement("div");
@@ -108,14 +164,13 @@
     }
 
     function lionelReply(userText) {
-      // resposta simples por enquanto (depois ligamos na API)
       setTimeout(() => {
-        addMessage("Entendi. Estou aqui com você.", "lionel");
-        speak("Entendi. Estou aqui com você.");
+        const reply = "Entendi. Estou aqui com você.";
+        addMessage(reply, "lionel");
+        speak(reply);
       }, 600);
     }
 
-    // Texto → resposta
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && input.value.trim() !== "") {
         const text = input.value;
@@ -125,7 +180,6 @@
       }
     });
 
-    // Voz
     let recognition;
     if ("webkitSpeechRecognition" in window) {
       recognition = new webkitSpeechRecognition();
@@ -140,14 +194,10 @@
     }
 
     micBtn.onclick = () => {
-      if (recognition) {
-        recognition.start();
-      } else {
-        alert("Reconhecimento de voz não disponível.");
-      }
+      if (recognition) recognition.start();
+      else alert("Reconhecimento de voz não disponível.");
     };
 
-    // Fala do Lionel
     function speak(text) {
       if ("speechSynthesis" in window) {
         const utter = new SpeechSynthesisUtterance(text);
@@ -156,7 +206,23 @@
       }
     }
 
-    // Mensagem inicial
+    settingsBtn.onclick = () => {
+      apiKeyInput.value = localStorage.getItem("lionel_api") || "";
+      aiNameInput.value = localStorage.getItem("lionel_name") || "Lionel";
+      settingsDiv.style.display = "block";
+    };
+
+    function closeSettings() {
+      settingsDiv.style.display = "none";
+    }
+
+    function saveSettings() {
+      localStorage.setItem("lionel_api", apiKeyInput.value);
+      localStorage.setItem("lionel_name", aiNameInput.value);
+      alert("Configurações salvas");
+      closeSettings();
+    }
+
     addMessage("Oi. Pode falar comigo quando quiser.", "lionel");
     speak("Oi. Pode falar comigo quando quiser.");
   </script>
