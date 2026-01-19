@@ -1,42 +1,41 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.leo.lionel.v4" version="1.0.0"
+<widget id="com.lionel.app"
+    version="1.0.0"
     xmlns="http://www.w3.org/ns/widgets"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:cdv="http://cordova.apache.org/ns/1.0">
 
-    <name>Lionel AI</name>
-    <description>Sentinela Proativo e Evolutivo 2026 - Léo &amp; Lionel</description>
-    <author email="dev@lionel.ai">Léo</author>
+    <name>Lionel</name>
+    <description>
+        Lionel — assistente companheiro proativo
+    </description>
 
+    <author email="leo@email.com" href="https://github.com/seuusuario">
+        Leo
+    </author>
+
+    <!-- APP BASE -->
     <content src="index.html" />
-    <access origin="*" />
-    <preference name="AndroidXEnabled" value="true" />
-    <preference name="KeepRunning" value="true" />
-    <preference name="MediaPlaybackRequiresUserAction" value="false" />
-    <preference name="AndroidPersistentFileLocation" value="Compatibility" />
+    <allow-navigation href="*" />
+    <allow-intent href="*" />
 
+    <!-- PERMISSÕES ANDROID -->
     <platform name="android">
-        <config-file target="AndroidManifest.xml" parent="/*">
-            <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
-            <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-            <uses-permission android:name="android.permission.RECORD_AUDIO" />
-            <uses-permission android:name="android.permission.CAMERA" />
-            <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-            <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-            <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-            <uses-permission android:name="android.permission.INTERNET" />
-            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-            <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-            <uses-permission android:name="android.permission.WAKE_LOCK" />
-            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-            <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-        </config-file>
+        <uses-permission android:name="android.permission.INTERNET" />
+        <uses-permission android:name="android.permission.RECORD_AUDIO" />
+        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+        <uses-permission android:name="android.permission.WAKE_LOCK" />
+        <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+        <!-- mantém app vivo -->
+        <preference name="AndroidPersistentFileLocation" value="Internal" />
+        <preference name="android-targetSdkVersion" value="33" />
+        <preference name="android-minSdkVersion" value="23" />
     </platform>
 
-    <plugin name="cordova-plugin-camera" spec="^7.0.0" />
-    <plugin name="cordova-plugin-media" spec="^7.0.0" />
-    <plugin name="cordova-plugin-file" spec="^8.0.0" />
-    <plugin name="cordova-plugin-background-mode" spec="^0.7.3" />
-    <plugin name="cordova-plugin-device" spec="^3.0.0" />
-    <plugin name="cordova-plugin-android-permissions" spec="^1.1.5" />
+    <!-- VISUAL -->
+    <preference name="Fullscreen" value="false" />
+    <preference name="Orientation" value="portrait" />
+    <preference name="StatusBarOverlaysWebView" value="false" />
+    <preference name="StatusBarStyle" value="lightcontent" />
+
 </widget>
