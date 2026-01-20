@@ -9,39 +9,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Pega o código do repositório
+    # 1️⃣ Baixa o código do repositório
     - uses: actions/checkout@v4
 
-    # Configura Node.js
+    # 2️⃣ Node.js
     - uses: actions/setup-node@v4
       with:
         node-version: 18
 
-    # Configura Java 17 (Temurin)
+    # 3️⃣ Java 17 (compatível com Cordova 14)
     - uses: actions/setup-java@v4
       with:
         distribution: temurin
         java-version: 17
 
-    # Instala Cordova globalmente
+    # 4️⃣ Instala Cordova
     - run: npm install -g cordova
 
-    # Instala dependências do projeto
+    # 5️⃣ Instala dependências do projeto
     - run: npm install
 
-    # Remove plataforma Android se existir
+    # 6️⃣ Remove Android antigo (se existir)
     - run: cordova platform rm android || true
 
-    # Adiciona a plataforma Android 11
-    - run: npx cordova platform add android@11.0.0
+    # 7️⃣ Adiciona Android correto (14)
+    - run: npx cordova platform add android@14.0.1
 
-    # Suprime aviso de compileSdk
+    # 8️⃣ Evita aviso de SDK (não quebra build)
     - run: echo "android.suppressUnsupportedCompileSdk=35" >> platforms/android/gradle.properties
 
-    # Build do APK em modo release
+    # 9️⃣ Build APK release
     - run: npx cordova build android --release
 
-    # Upload do APK gerado
+    # 🔟 Salva o APK como artefato
     - uses: actions/upload-artifact@v4
       with:
         name: lionel-apk
