@@ -29,18 +29,18 @@ jobs:
     # 5️⃣ Instala dependências do projeto
     - run: npm install
 
-    # 6️⃣ Instala Gradle 8.2 para compatibilidade com Cordova
+    # 6️⃣ Instala Gradle 8.2 (compatível com Cordova)
     - name: Instalar Gradle 8.2
       run: |
         wget https://services.gradle.org/distributions/gradle-8.2-bin.zip
         unzip gradle-8.2-bin.zip
         echo "$PWD/gradle-8.2/bin" >> $GITHUB_PATH
 
-    # 7️⃣ Instala Android SDK Build Tools 32.0.0 e SDK Platform 33
-    - name: Instalar Android Build Tools e Platform
+    # 7️⃣ Instala Android Build Tools e Platform corretos
+    - name: Instalar Build Tools e Platform
       run: |
-        yes | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;32.0.0"
-        yes | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-33"
+        mkdir -p $ANDROID_HOME/cmdline-tools/latest
+        yes | sdkmanager --sdk_root=$ANDROID_HOME "build-tools;32.0.0" "platforms;android-33"
 
     # 8️⃣ Remove a plataforma Android antiga
     - run: cordova platform rm android || true
