@@ -1,24 +1,43 @@
 name: Build APK Lionel
+
 on:
   push:
     branches: [ "main" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+    # 1️⃣ Pega o código do repositório
     - uses: actions/checkout@v4
+
+    # 2️⃣ Instala Node.js
     - uses: actions/setup-node@v4
       with:
         node-version: 18
+
+    # 3️⃣ Instala Java (Temurin 17)
     - uses: actions/setup-java@v4
       with:
         distribution: temurin
         java-version: 17
+
+    # 4️⃣ Instala Cordova globalmente
     - run: npm install -g cordova
+
+    # 5️⃣ Instala dependências do projeto
     - run: npm install
-    - run: cordova platform add android || true
+
+    # 6️⃣ Limpa a plataforma Android (resolve arquivos antigos que quebram build)
+    - run: cordova platform rm android || true
+    - run: cordova platform add android
+
+    # 7️⃣ Build do APK Android (debug)
     - run: cordova build android
+
+    # 8️⃣ Faz upload do APK gerado como artifact
     - uses: actions/upload-artifact@v4
       with:
         name: lionel-apk
-        path: platforms/android/app/build/outputs/apk/
+        path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
