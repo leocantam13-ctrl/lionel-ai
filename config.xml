@@ -1,38 +1,15 @@
-<?xml version='1.0' encoding='utf-8'?>
-<widget
-    id="com.leo.lionel"
+<?xml version="1.0" encoding="utf-8"?>
+<widget id="com.leo.lionel"
     version="1.0.0"
     xmlns="http://www.w3.org/ns/widgets"
-    xmlns:cdv="http://cordova.apache.org/ns/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <name>Lionel</name>
+    <description>Assistente Lionel</description>
 
-    <description>
-        Lionel AI Companion
-    </description>
-
-    <author email="leo@email.com" href="https://github.com/leocantam13-ctrl">
-        Leo
-    </author>
-
-    <content src="index.html" />
-
-    <access origin="*" />
-
-    <!-- ANDROID -->
     <platform name="android">
-
-        <!-- PERMISSÕES (FORMA CORRETA) -->
-        <uses-permission android:name="android.permission.INTERNET" />
-        <uses-permission android:name="android.permission.RECORD_AUDIO" />
-        <uses-permission android:name="android.permission.CAMERA" />
-        <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-
-        <!-- SDK -->
-        <preference name="android-minSdkVersion" value="24" />
-        <preference name="android-targetSdkVersion" value="33" />
-
+        <preference name="android-targetSdkVersion" value="34" />
+        <preference name="android-compileSdkVersion" value="34" />
     </platform>
 
 </widget>
