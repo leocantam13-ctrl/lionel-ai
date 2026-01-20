@@ -1,185 +1,212 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lionel</title>
+  <meta charset="utf-8">
+  <title>Lionel</title>
 
-<style>
-body {
-  margin: 0;
-  background: #0b0b0f;
-  color: #f5f5f5;
-  font-family: Arial;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-}
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-header {
-  padding: 12px;
-  background: linear-gradient(90deg,#1a1a1a,#2a1f0f);
-  color: #d4af37;
-  text-align: center;
-  font-weight: bold;
-}
+  <!-- CSP compatível com Cordova -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src * 'self' data: blob: 'unsafe-inline' 'unsafe-eval';
+                 img-src * data: blob:;
+                 media-src * blob:;
+                 connect-src *">
 
-video {
-  width: 100%;
-  max-height: 220px;
-  background: black;
-}
-
-#chat {
-  flex: 1;
-  padding: 10px;
-  overflow-y: auto;
-}
-
-.msg {
-  margin-bottom: 8px;
-  max-width: 80%;
-  padding: 10px;
-  border-radius: 10px;
-}
-
-.user { background: #1e1e2e; margin-left: auto; }
-.lionel { background: #2a1f0f; color: #f0d77a; }
-
-footer {
-  display: flex;
-  gap: 6px;
-  padding: 8px;
-  background: #111;
-}
-
-button {
-  flex: 1;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  background: #d4af37;
-  font-weight: bold;
-}
-</style>
+  <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #fff;
+    }
+    h2, h3 {
+      margin-top: 20px;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    .on { background: #16a34a; color: #fff; }
+    .off { background: #dc2626; color: #fff; }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+    }
+    video {
+      width: 100%;
+      margin-top: 10px;
+      border-radius: 10px;
+      background: #000;
+    }
+    #status {
+      margin-top: 16px;
+      opacity: 0.8;
+    }
+  </style>
 </head>
 
 <body>
 
-<header>👁️ Lionel — Companheiro Consciente</header>
+  <h2>🤖 Lionel</h2>
 
-<video id="video" autoplay playsinline muted></video>
+  <!-- ===================== -->
+  <!-- CÂMERA EXTERNA / WIFI -->
+  <!-- ===================== -->
+  <h3>📷 Visão (Câmera externa / Wi-Fi)</h3>
+  <input id="cameraUrl" placeholder="URL da câmera (http ou stream)" />
+  <button id="btnCamera" class="off">Ativar visão</button>
+  <video id="cameraView" autoplay playsinline muted></video>
 
-<div id="chat"></div>
+  <!-- ===================== -->
+  <!-- MODO COMPANHEIRO -->
+  <!-- ===================== -->
+  <h3>🎧 Modo Companheiro</h3>
+  <button id="btnCompanion" class="off">Ativar modo companheiro</button>
 
-<footer>
-  <button onclick="toggleCellCamera()">📷 Celular</button>
-  <button onclick="connectIP()">🌐 IP</button>
-  <button onclick="startCompanion()">🎧 Ouvir</button>
-  <button onclick="stopCompanion()">⛔</button>
-</footer>
+  <p id="status">Status: parado</p>
 
-<script>
-const chat = document.getElementById("chat");
-const video = document.getElementById("video");
+  <script>
+    document.addEventListener("deviceready", onDeviceReady, false);
+    if (!window.cordova) onDeviceReady(); // permite rodar no navegador também
 
-function add(text, who){
-  const d = document.createElement("div");
-  d.className = "msg " + who;
-  d.innerText = text;
-  chat.appendChild(d);
-  chat.scrollTop = chat.scrollHeight;
-}
+    function onDeviceReady() {
+      console.log("Lionel iniciado");
+    }
 
-function speak(text){
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "pt-BR";
-  speechSynthesis.speak(u);
-}
+    /* ======================
+       ESTADO
+    ====================== */
+    let companionActive = false;
+    let cameraActive = false;
+    let recognition = null;
 
-/* =====================
-   CÂMERA DO CELULAR
-===================== */
-let stream = null;
+    const statusEl = document.getElementById("status");
+    const btnCompanion = document.getElementById("btnCompanion");
+    const btnCamera = document.getElementById("btnCamera");
+    const cameraView = document.getElementById("cameraView");
 
-async function toggleCellCamera(){
-  if (stream){
-    stream.getTracks().forEach(t => t.stop());
-    stream = null;
-    video.srcObject = null;
-    add("Pare de ver.", "lionel");
-    speak("Câmera desligada.");
-    return;
-  }
+    /* ======================
+       VOZ (FALAR)
+    ====================== */
+    function falar(texto) {
+      const msg = new SpeechSynthesisUtterance(texto);
+      msg.lang = "pt-BR";
+      speechSynthesis.speak(msg);
+    }
 
-  stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  video.srcObject = stream;
-  add("Estou vendo você agora.", "lionel");
-  speak("Estou vendo você agora.");
-}
+    /* ======================
+       ESCUTA CONTÍNUA
+    ====================== */
+    function iniciarEscuta() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Reconhecimento de voz não suportado");
+        return;
+      }
 
-/* =====================
-   CÂMERA IP / WI-FI
-===================== */
-function connectIP(){
-  const url = prompt("Cole a URL da câmera IP (MJPEG ou M3U8):");
-  if (!url) return;
+      recognition = new SpeechRecognition();
+      recognition.lang = "pt-BR";
+      recognition.continuous = true;
+      recognition.interimResults = false;
 
-  video.srcObject = null;
-  video.src = url;
-  video.play();
+      recognition.onresult = (event) => {
+        const texto = event.results[event.results.length - 1][0].transcript.toLowerCase();
+        analisarTexto(texto);
+      };
 
-  add("Conectado à câmera Wi-Fi.", "lionel");
-  speak("Conectado à câmera Wi-Fi.");
-}
+      recognition.onerror = () => {
+        if (companionActive) recognition.start();
+      };
 
-/* =====================
-   MODO COMPANHEIRO
-===================== */
-let recognition;
-let active = false;
+      recognition.onend = () => {
+        if (companionActive) recognition.start();
+      };
 
-if ("webkitSpeechRecognition" in window){
-  recognition = new webkitSpeechRecognition();
-  recognition.lang = "pt-BR";
-  recognition.continuous = true;
+      recognition.start();
+    }
 
-  recognition.onresult = e => {
-    if (!active) return;
-    const text = e.results[e.results.length-1][0].transcript;
-    add(text, "user");
+    function pararEscuta() {
+      if (recognition) recognition.stop();
+    }
 
-    const reply = comment(text);
-    add(reply, "lionel");
-    speak(reply);
-  };
-}
+    /* ======================
+       INTELIGÊNCIA SIMPLES
+    ====================== */
+    function analisarTexto(texto) {
+      console.log("Ouvi:", texto);
 
-function comment(text){
-  const t = text.toLowerCase();
+      if (texto.includes("hora")) {
+        falar("Posso te lembrar disso depois, se quiser.");
+      } else if (texto.includes("difícil")) {
+        falar("Percebo tensão. Quer que eu te ajude a pensar?");
+      } else if (texto.includes("trabalho")) {
+        falar("Isso parece importante para você.");
+      } else if (texto.includes("engraçado")) {
+        falar("Hehe, isso foi bom.");
+      } else {
+        falar("Estou atento ao que você diz.");
+      }
+    }
 
-  if (t.includes("hora")) return "Parece um assunto de tempo, quer que eu lembre depois?";
-  if (t.includes("difícil")) return "O clima parece pesado, quer ajuda pra responder?";
-  if (t.includes("trabalho")) return "Isso soa importante.";
-  if (t.includes("engraçado")) return "Isso foi engraçado mesmo 😄";
+    /* ======================
+       BOTÃO MODO COMPANHEIRO
+    ====================== */
+    btnCompanion.onclick = () => {
+      companionActive = !companionActive;
 
-  return "Estou atento ao que está acontecendo.";
-}
+      if (companionActive) {
+        btnCompanion.className = "on";
+        btnCompanion.innerText = "Desativar modo companheiro";
+        statusEl.innerText = "Status: ouvindo continuamente";
+        iniciarEscuta();
+        falar("Modo companheiro ativado. Estou com você.");
+      } else {
+        btnCompanion.className = "off";
+        btnCompanion.innerText = "Ativar modo companheiro";
+        statusEl.innerText = "Status: parado";
+        pararEscuta();
+        falar("Modo companheiro desativado.");
+      }
+    };
 
-function startCompanion(){
-  active = true;
-  recognition.start();
-  add("Estou ouvindo ativamente.", "lionel");
-  speak("Estou ouvindo ativamente.");
-}
+    /* ======================
+       CÂMERA EXTERNA
+    ====================== */
+    btnCamera.onclick = () => {
+      cameraActive = !cameraActive;
 
-function stopCompanion(){
-  active = false;
-  if (recognition) recognition.stop();
-  add("Modo companheiro desligado.", "lionel");
-  speak("Modo companheiro desligado.");
-}
-</script>
+      if (cameraActive) {
+        const url = document.getElementById("cameraUrl").value.trim();
+        if (!url) {
+          alert("Informe a URL da câmera");
+          cameraActive = false;
+          return;
+        }
+        cameraView.src = url;
+        btnCamera.className = "on";
+        btnCamera.innerText = "Desativar visão";
+        statusEl.innerText = "Status: observando a câmera";
+        falar("Visão ativada.");
+      } else {
+        cameraView.src = "";
+        btnCamera.className = "off";
+        btnCamera.innerText = "Ativar visão";
+        statusEl.innerText = "Status: parado";
+        falar("Visão desativada.");
+      }
+    };
+  </script>
 
 </body>
 </html>
