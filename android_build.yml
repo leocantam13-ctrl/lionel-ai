@@ -20,20 +20,25 @@ jobs:
         distribution: temurin
         java-version: 17
 
-    - run: npm install -g cordova
-    - run: npm install
+    # Instala Cordova localmente e dependências
+    - run: npm ci
+    - run: npx cordova -v  # só pra conferir versão
 
-    # Remove Android se existir
-    - run: cordova platform rm android || true
+    # Remove Android se já existir
+    - run: npx cordova platform rm android || true
 
-    # Adiciona Android (gera gradlew automaticamente)
-    - run: cordova platform add android@11.0.0
+    # Adiciona Android versão fixa 11
+    - run: npx cordova platform add android@11.0.0
+
+    # Instala SDK necessário e aceita licenças
+    - run: sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+    - run: yes | sdkmanager --licenses
 
     # Suprime aviso de compileSdk
     - run: echo "android.suppressUnsupportedCompileSdk=35" >> platforms/android/gradle.properties
 
-    # Build do APK (release)
-    - run: cordova build android --release
+    # Build do APK release
+    - run: npx cordova build android --release
 
     # Upload do APK
     - uses: actions/upload-artifact@v4
