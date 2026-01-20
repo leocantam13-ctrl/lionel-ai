@@ -9,34 +9,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Pega o código do repositório
     - uses: actions/checkout@v4
 
-    # 2️⃣ Instala Node.js
     - uses: actions/setup-node@v4
       with:
         node-version: 18
 
-    # 3️⃣ Instala Java (Temurin 17)
     - uses: actions/setup-java@v4
       with:
         distribution: temurin
         java-version: 17
 
-    # 4️⃣ Instala Cordova globalmente
     - run: npm install -g cordova
-
-    # 5️⃣ Instala dependências do projeto
     - run: npm install
 
-    # 6️⃣ Limpa a plataforma Android (resolve arquivos antigos que quebram build)
+    # Limpa e recria a plataforma Android
     - run: cordova platform rm android || true
     - run: cordova platform add android
 
-    # 7️⃣ Build do APK Android (debug)
+    # Cria gradle.properties para suprimir o aviso
+    - run: echo "android.suppressUnsupportedCompileSdk=35" >> platforms/android/gradle.properties
+
+    # Build do APK
     - run: cordova build android
 
-    # 8️⃣ Faz upload do APK gerado como artifact
+    # Upload do APK
     - uses: actions/upload-artifact@v4
       with:
         name: lionel-apk
