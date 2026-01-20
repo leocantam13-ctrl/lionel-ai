@@ -29,19 +29,26 @@ jobs:
     # 5️⃣ Instala dependências do projeto
     - run: npm install
 
-    # 6️⃣ Limpa plataforma Android antiga
+    # 6️⃣ Instala Gradle 8.2 para evitar XmlParser quebrado
+    - name: Instalar Gradle 8.2
+      run: |
+        wget https://services.gradle.org/distributions/gradle-8.2-bin.zip
+        unzip gradle-8.2-bin.zip
+        echo "$PWD/gradle-8.2/bin" >> $GITHUB_PATH
+
+    # 7️⃣ Limpa plataforma Android antiga
     - run: cordova platform rm android || true
 
-    # 7️⃣ Adiciona Cordova Android atualizado (resolvido problemas de config.xml)
+    # 8️⃣ Adiciona Cordova Android atualizado
     - run: cordova platform add android@11.0.0
 
-    # 8️⃣ Cria gradle.properties para suprimir aviso do compileSdk
+    # 9️⃣ Cria gradle.properties para suprimir aviso do compileSdk
     - run: echo "android.suppressUnsupportedCompileSdk=35" >> platforms/android/gradle.properties
 
-    # 9️⃣ Build do APK debug
+    # 🔟 Build do APK debug usando gradle 8.2
     - run: cordova build android
 
-    # 🔟 Upload do APK como artifact
+    # 1️⃣1️⃣ Upload do APK como artifact
     - uses: actions/upload-artifact@v4
       with:
         name: lionel-apk
