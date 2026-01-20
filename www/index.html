@@ -24,41 +24,40 @@ header {
   font-weight: bold;
 }
 
+video {
+  width: 100%;
+  max-height: 220px;
+  background: black;
+}
+
 #chat {
   flex: 1;
-  padding: 12px;
+  padding: 10px;
   overflow-y: auto;
 }
 
 .msg {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   max-width: 80%;
   padding: 10px;
   border-radius: 10px;
 }
 
-.user {
-  background: #1e1e2e;
-  margin-left: auto;
-}
-
-.lionel {
-  background: #2a1f0f;
-  color: #f0d77a;
-}
+.user { background: #1e1e2e; margin-left: auto; }
+.lionel { background: #2a1f0f; color: #f0d77a; }
 
 footer {
   display: flex;
-  padding: 10px;
+  gap: 6px;
+  padding: 8px;
   background: #111;
-  gap: 8px;
 }
 
 button {
   flex: 1;
-  padding: 12px;
-  border: none;
+  padding: 10px;
   border-radius: 8px;
+  border: none;
   background: #d4af37;
   font-weight: bold;
 }
@@ -67,23 +66,28 @@ button {
 
 <body>
 
-<header>👁️ Lionel — Modo Companheiro</header>
+<header>👁️ Lionel — Companheiro Consciente</header>
+
+<video id="video" autoplay playsinline muted></video>
 
 <div id="chat"></div>
 
 <footer>
-  <button onclick="startCompanion()">▶️ Iniciar Modo Companheiro</button>
-  <button onclick="stopCompanion()">⛔ Parar</button>
+  <button onclick="toggleCellCamera()">📷 Celular</button>
+  <button onclick="connectIP()">🌐 IP</button>
+  <button onclick="startCompanion()">🎧 Ouvir</button>
+  <button onclick="stopCompanion()">⛔</button>
 </footer>
 
 <script>
 const chat = document.getElementById("chat");
+const video = document.getElementById("video");
 
-function addMessage(text, who){
-  const div = document.createElement("div");
-  div.className = "msg " + who;
-  div.innerText = text;
-  chat.appendChild(div);
+function add(text, who){
+  const d = document.createElement("div");
+  d.className = "msg " + who;
+  d.innerText = text;
+  chat.appendChild(d);
   chat.scrollTop = chat.scrollHeight;
 }
 
@@ -93,57 +97,87 @@ function speak(text){
   speechSynthesis.speak(u);
 }
 
-let recognition;
-let companionActive = false;
+/* =====================
+   CÂMERA DO CELULAR
+===================== */
+let stream = null;
 
-if ("webkitSpeechRecognition" in window) {
+async function toggleCellCamera(){
+  if (stream){
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+    video.srcObject = null;
+    add("Pare de ver.", "lionel");
+    speak("Câmera desligada.");
+    return;
+  }
+
+  stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  video.srcObject = stream;
+  add("Estou vendo você agora.", "lionel");
+  speak("Estou vendo você agora.");
+}
+
+/* =====================
+   CÂMERA IP / WI-FI
+===================== */
+function connectIP(){
+  const url = prompt("Cole a URL da câmera IP (MJPEG ou M3U8):");
+  if (!url) return;
+
+  video.srcObject = null;
+  video.src = url;
+  video.play();
+
+  add("Conectado à câmera Wi-Fi.", "lionel");
+  speak("Conectado à câmera Wi-Fi.");
+}
+
+/* =====================
+   MODO COMPANHEIRO
+===================== */
+let recognition;
+let active = false;
+
+if ("webkitSpeechRecognition" in window){
   recognition = new webkitSpeechRecognition();
   recognition.lang = "pt-BR";
   recognition.continuous = true;
-  recognition.interimResults = false;
 
-  recognition.onresult = (event) => {
-    if (!companionActive) return;
+  recognition.onresult = e => {
+    if (!active) return;
+    const text = e.results[e.results.length-1][0].transcript;
+    add(text, "user");
 
-    const text = event.results[event.results.length - 1][0].transcript;
-    addMessage(text, "user");
-
-    // Comentário proativo
-    setTimeout(() => {
-      const reply = generateComment(text);
-      addMessage(reply, "lionel");
-      speak(reply);
-    }, 700);
+    const reply = comment(text);
+    add(reply, "lionel");
+    speak(reply);
   };
 }
 
-function generateComment(text){
-  const lower = text.toLowerCase();
+function comment(text){
+  const t = text.toLowerCase();
 
-  if (lower.includes("número")) return "Quer que eu salve esse número pra você?";
-  if (lower.includes("hora") || lower.includes("horas")) return "Quer que eu crie um alarme pra isso?";
-  if (lower.includes("difícil")) return "Percebi um clima tenso aí… quer ajuda pra responder?";
-  if (lower.includes("engraçado")) return "Confesso que essa foi boa 😄";
+  if (t.includes("hora")) return "Parece um assunto de tempo, quer que eu lembre depois?";
+  if (t.includes("difícil")) return "O clima parece pesado, quer ajuda pra responder?";
+  if (t.includes("trabalho")) return "Isso soa importante.";
+  if (t.includes("engraçado")) return "Isso foi engraçado mesmo 😄";
 
-  return "Entendi… estou acompanhando aqui.";
+  return "Estou atento ao que está acontecendo.";
 }
 
 function startCompanion(){
-  if (!recognition) {
-    alert("Reconhecimento de voz não disponível.");
-    return;
-  }
-  companionActive = true;
-  addMessage("Modo companheiro ativado. Estou ouvindo.", "lionel");
-  speak("Modo companheiro ativado. Estou ouvindo.");
+  active = true;
   recognition.start();
+  add("Estou ouvindo ativamente.", "lionel");
+  speak("Estou ouvindo ativamente.");
 }
 
 function stopCompanion(){
-  companionActive = false;
+  active = false;
   if (recognition) recognition.stop();
-  addMessage("Modo companheiro desativado.", "lionel");
-  speak("Modo companheiro desativado.");
+  add("Modo companheiro desligado.", "lionel");
+  speak("Modo companheiro desligado.");
 }
 </script>
 
