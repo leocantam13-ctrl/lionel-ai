@@ -1,15 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
-<widget id="com.leo.lionel"
-    version="1.0.0"
-    xmlns="http://www.w3.org/ns/widgets"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="io.lionel.ai"
+        version="1.0.0"
+        xmlns="http://www.w3.org/ns/widgets"
+        xmlns:cdv="http://cordova.apache.org/ns/1.0">
 
-    <name>Lionel</name>
-    <description>Assistente Lionel</description>
+  <name>Lionel</name>
+  <description>Assistente companheiro</description>
+  <author email="lionel@ai.com">Lionel</author>
 
-    <platform name="android">
-        <preference name="android-targetSdkVersion" value="34" />
-        <preference name="android-compileSdkVersion" value="34" />
-    </platform>
+  <content src="index.html" />
+
+  <access origin="*" />
+  <allow-navigation href="*" />
+
+  <preference name="AndroidPersistentFileLocation" value="Internal" />
+  <preference name="DisallowOverscroll" value="true" />
+  <preference name="Orientation" value="portrait" />
+
+  <!-- Permissões -->
+  <platform name="android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.CAMERA" />
+  </platform>
 
 </widget>
