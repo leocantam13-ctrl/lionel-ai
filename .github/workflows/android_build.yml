@@ -9,43 +9,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Pega o código do repositório
     - uses: actions/checkout@v4
-
-    # 2️⃣ Configura Node.js
     - uses: actions/setup-node@v4
       with:
         node-version: 18
-
-    # 3️⃣ Configura Java
     - uses: actions/setup-java@v4
       with:
         distribution: temurin
         java-version: 17
-
-    # 4️⃣ Instala Cordova
     - run: npm install -g cordova
-
-    # 5️⃣ Instala dependências do projeto
     - run: npm install
 
-    # 6️⃣ Remove e adiciona a plataforma Android
+    # 1️⃣ Remove Android se existir
     - run: cordova platform rm android || true
+
+    # 2️⃣ Adiciona Android (gera gradlew automaticamente)
     - run: cordova platform add android@11.0.0
 
-    # 7️⃣ Garante que o wrapper do Gradle existe
+    # 3️⃣ (Opcional) força versão do Gradle se precisar
     - run: |
         cd platforms/android
         ./gradlew wrapper --gradle-version 8.2
         cd ../..
 
-    # 8️⃣ Suprime avisos de compileSdk desatualizado
+    # 4️⃣ Suprime aviso de compileSdk
     - run: echo "android.suppressUnsupportedCompileSdk=35" >> platforms/android/gradle.properties
 
-    # 9️⃣ Build do APK
+    # 5️⃣ Build do APK
     - run: cordova build android --release
 
-    # 🔟 Upload do APK
+    # 6️⃣ Upload do APK
     - uses: actions/upload-artifact@v4
       with:
         name: lionel-apk
