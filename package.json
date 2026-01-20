@@ -1,21 +1,17 @@
 {
-  "name": "com.leo.lionel",
+  "name": "lionel",
   "displayName": "Lionel",
   "version": "1.0.0",
-  "description": "Lionel AI Companion App",
+  "description": "Lionel Cordova App",
+  "author": "Leo",
   "license": "Apache-2.0",
-
-  "dependencies": {
-    "cordova": "^12.0.0",
-    "cordova-android": "^14.0.1",
+  "devDependencies": {
+    "cordova-android": "11.0.0",
     "cordova-plugin-device": "^3.0.0",
     "cordova-plugin-whitelist": "^1.3.4"
   },
-
   "cordova": {
-    "platforms": [
-      "android"
-    ],
+    "platforms": ["android"],
     "plugins": {
       "cordova-plugin-device": {},
       "cordova-plugin-whitelist": {}
