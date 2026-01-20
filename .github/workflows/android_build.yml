@@ -23,33 +23,30 @@ jobs:
         distribution: temurin
         java-version: 17
 
-    # 4️⃣ Instala Cordova e dependências do projeto
+    # 4️⃣ Instala Cordova
     - run: npm install -g cordova
+
+    # 5️⃣ Instala dependências do projeto
     - run: npm install
 
-    # 5️⃣ Limpa e adiciona a plataforma Android
+    # 6️⃣ Remove e adiciona a plataforma Android
     - run: cordova platform rm android || true
     - run: cordova platform add android@11.0.0
 
-    # 6️⃣ Força Gradle 8.2 no wrapper da plataforma Android
+    # 7️⃣ Garante que o wrapper do Gradle existe
     - run: |
         cd platforms/android
         ./gradlew wrapper --gradle-version 8.2
         cd ../..
 
-    # 7️⃣ Cria gradle.properties para suprimir aviso de compileSdk
+    # 8️⃣ Suprime avisos de compileSdk desatualizado
     - run: echo "android.suppressUnsupportedCompileSdk=35" >> platforms/android/gradle.properties
 
-    # 8️⃣ Instala build-tools e platform (necessário para compilação)
-    - name: Instalar Build Tools e Platform
-      run: |
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "build-tools;32.0.0" "platforms;android-33"
+    # 9️⃣ Build do APK
+    - run: cordova build android --release
 
-    # 9️⃣ Build do APK debug
-    - run: cordova build android
-
-    # 🔟 Upload do APK gerado
+    # 🔟 Upload do APK
     - uses: actions/upload-artifact@v4
       with:
         name: lionel-apk
-        path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+        path: platforms/android/app/build/outputs/apk/release/app-release.apk
