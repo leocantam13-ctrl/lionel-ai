@@ -1,39 +1,38 @@
-<?xml version="1.0" encoding="utf-8"?>
-<widget id="com.lionel.app"
-        version="1.0.0"
-        xmlns="http://www.w3.org/ns/widgets"
-        xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<?xml version='1.0' encoding='utf-8'?>
+<widget
+    id="com.leo.lionel"
+    version="1.0.0"
+    xmlns="http://www.w3.org/ns/widgets"
+    xmlns:cdv="http://cordova.apache.org/ns/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <name>Lionel</name>
 
     <description>
-        Lionel — companheiro consciente ativado somente por você.
+        Lionel AI Companion
     </description>
 
-    <author email="leo@email.com">
+    <author email="leo@email.com" href="https://github.com/leocantam13-ctrl">
         Leo
     </author>
 
-    <!-- Arquivo inicial do app -->
     <content src="index.html" />
 
-    <!-- Permite navegação e intenções externas -->
-    <allow-navigation href="*" />
-    <allow-intent href="*" />
+    <access origin="*" />
 
-    <!-- Configurações específicas do Android -->
+    <!-- ANDROID -->
     <platform name="android">
-        <!-- Permissões -->
+
+        <!-- PERMISSÕES (FORMA CORRETA) -->
         <uses-permission android:name="android.permission.INTERNET" />
         <uses-permission android:name="android.permission.RECORD_AUDIO" />
         <uses-permission android:name="android.permission.CAMERA" />
+        <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
-        <!-- SDK mínimo e alvo -->
-        <preference name="android-minSdkVersion" value="23" />
-        <preference name="android-targetSdkVersion" value="35" />
+        <!-- SDK -->
+        <preference name="android-minSdkVersion" value="24" />
+        <preference name="android-targetSdkVersion" value="33" />
+
     </platform>
 
-    <!-- Preferências gerais -->
-    <preference name="Orientation" value="portrait" />
-    <preference name="Fullscreen" value="false" />
 </widget>
