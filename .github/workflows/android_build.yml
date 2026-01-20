@@ -9,54 +9,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # 1️⃣ Pega o código do repositório
     - uses: actions/checkout@v4
 
+    # 2️⃣ Configura Node.js
     - uses: actions/setup-node@v4
       with:
         node-version: 18
 
+    # 3️⃣ Configura Java
     - uses: actions/setup-java@v4
       with:
         distribution: temurin
         java-version: 17
 
-    # Instalar Cordova globalmente
+    # 4️⃣ Instala Cordova e dependências do projeto
     - run: npm install -g cordova
     - run: npm install
 
-    # Baixar e usar Gradle 8.2 (compatível com Cordova)
-    - name: Instalar Gradle 8.2
-      run: |
-        wget https://services.gradle.org/distributions/gradle-8.2-bin.zip
-        unzip gradle-8.2-bin.zip
-        echo "$PWD/gradle-8.2/bin" >> $GITHUB_PATH
+    # 5️⃣ Limpa e adiciona a plataforma Android
+    - run: cordova platform rm android || true
+    - run: cordova platform add android@11.0.0
 
-    # Instalar Command Line Tools do Android
-    - name: Instalar Command Line Tools
-      run: |
-        mkdir -p $ANDROID_HOME/cmdline-tools
-        cd $ANDROID_HOME/cmdline-tools
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-        unzip cmdline-tools.zip
-        mv cmdline-tools latest
-        rm cmdline-tools.zip
+    # 6️⃣ Força Gradle 8.2 no wrapper da plataforma Android
+    - run: |
+        cd platforms/android
+        ./gradlew wrapper --gradle-version 8.2
+        cd ../..
 
-    # Instalar Build Tools 32 e Platform 33
+    # 7️⃣ Cria gradle.properties para suprimir aviso de compileSdk
+    - run: echo "android.suppressUnsupportedCompileSdk=35" >> platforms/android/gradle.properties
+
+    # 8️⃣ Instala build-tools e platform (necessário para compilação)
     - name: Instalar Build Tools e Platform
       run: |
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "build-tools;32.0.0" "platforms;android-33"
 
-    # Limpar e adicionar plataforma Android no Cordova
-    - run: cordova platform rm android || true
-    - run: cordova platform add android@11.0.0
-
-    # Suprimir aviso de compileSdk
-    - run: echo "android.suppressUnsupportedCompileSdk=35" >> platforms/android/gradle.properties
-
-    # Build do APK debug
+    # 9️⃣ Build do APK debug
     - run: cordova build android
 
-    # Upload do APK gerado
+    # 🔟 Upload do APK gerado
     - uses: actions/upload-artifact@v4
       with:
         name: lionel-apk
