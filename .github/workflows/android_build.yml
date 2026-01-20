@@ -20,8 +20,16 @@ jobs:
         distribution: temurin
         java-version: 17
 
+    # Instalar Cordova globalmente
     - run: npm install -g cordova
     - run: npm install
+
+    # Baixar e usar Gradle 8.2 (compatível com Cordova)
+    - name: Instalar Gradle 8.2
+      run: |
+        wget https://services.gradle.org/distributions/gradle-8.2-bin.zip
+        unzip gradle-8.2-bin.zip
+        echo "$PWD/gradle-8.2/bin" >> $GITHUB_PATH
 
     # Instalar Command Line Tools do Android
     - name: Instalar Command Line Tools
@@ -33,18 +41,16 @@ jobs:
         mv cmdline-tools latest
         rm cmdline-tools.zip
 
-    # Instalar Build Tools e Platforms
+    # Instalar Build Tools 32 e Platform 33
     - name: Instalar Build Tools e Platform
       run: |
         yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "build-tools;32.0.0" "platforms;android-33"
 
-    # Remove a plataforma Android antiga
+    # Limpar e adicionar plataforma Android no Cordova
     - run: cordova platform rm android || true
-
-    # Adiciona Cordova Android atualizado
     - run: cordova platform add android@11.0.0
 
-    # Suprimir warning do compileSdk
+    # Suprimir aviso de compileSdk
     - run: echo "android.suppressUnsupportedCompileSdk=35" >> platforms/android/gradle.properties
 
     # Build do APK debug
